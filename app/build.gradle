@@ -4,12 +4,6 @@ apply plugin: 'kotlin-kapt'
 
 android {
     signingConfigs {
-        config {
-            keyAlias 'key0'
-            keyPassword 'q1w2e3'
-            storeFile file('D:/test.jks')
-            storePassword 'q1w2e3'
-        }
     }
     compileSdkVersion 28
     defaultConfig {
@@ -29,11 +23,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
         }
         debug {
             debuggable true
-            signingConfig signingConfigs.config
         }
     }
     externalNativeBuild {
