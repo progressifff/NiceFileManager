@@ -1,0 +1,113 @@
+<resources>
+
+    <style name="SearchViewStyleLight" parent="SearchView.Light">
+        <item name="backgroundColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="SearchViewStyleDark" parent="SearchView.Dark">
+        <item name="backgroundColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="ActionModeLight" parent="Widget.AppCompat.ActionMode">
+        <item name="android:actionModeBackground">?attr/colorPrimary</item>
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="background">?attr/colorPrimary</item>
+        <item name="titleTextStyle">@style/ActionModeTitleTextStyleLight</item>
+    </style>
+
+    <style name="ActionModeDark" parent="Widget.AppCompat.ActionMode">
+        <item name="android:actionModeBackground">?attr/colorPrimary</item>
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="background">?attr/colorPrimary</item>
+        <item name="titleTextStyle">@style/ActionModeTitleTextStyleDark</item>
+    </style>
+
+    <style name="ActionModeCloseButton" parent="Widget.AppCompat.Light.ActionButton.CloseMode">
+        <item name="android:tint">?attr/iconColor</item>
+    </style>
+
+    <style name="ActionModeTitleTextStyleLight" parent="@style/TextAppearance.AppCompat.Widget.ActionMode.Title">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="ActionModeTitleTextStyleDark" parent="@style/TextAppearance.AppCompat.Widget.ActionMode.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+
+    <style name="AppThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="iconColor">@color/iconColorLight</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/ActionModeLight</item>
+        <item name="android:actionModeStyle">@style/ActionModeLight</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="searchViewStyle">@style/SearchViewStyleLight</item>
+        <item name="bottomSheetDialogTheme">@style/BottomSheetDialogLight</item>
+        <item name="secondaryTextColor">@color/secondaryTextColorLight</item>
+        <item name="android:textViewStyle">@style/TextViewStyleLight</item>
+        <item name="selectedFilesDrawable">@drawable/selected_files_list_entry_light</item>
+        <item name="drawerItemColor">@drawable/drawer_item_color_light</item>
+        <item name="dividerColor">@color/items_divider_color_light</item>
+        <item name="layoutRefresherColor">@color/layoutRefresherColorLight</item>
+    </style>
+
+
+    <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/darkThemeColorPrimary</item>
+        <item name="colorPrimaryDark">@color/darkThemeColorPrimaryDark</item>
+        <item name="colorAccent">@color/darkThemeColorAccent</item>
+        <item name="iconColor">@color/iconColorDark</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/ActionModeDark</item>
+        <item name="android:actionModeStyle">@style/ActionModeDark</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="searchViewStyle">@style/SearchViewStyleDark</item>
+        <item name="android:windowBackground">@color/darkThemeColorPrimary</item>
+        <item name="android:alertDialogTheme">@style/AlertDialogDark</item>
+        <item name="alertDialogTheme">@style/AlertDialogDark</item>
+        <item name="bottomSheetDialogTheme">@style/BottomSheetDialogDark</item>
+        <item name="secondaryTextColor">@color/secondaryTextColorDark</item>
+        <item name="android:textViewStyle">@style/TextViewStyleDark</item>
+        <item name="selectedFilesDrawable">@drawable/selected_files_list_entry_dark</item>
+        <item name="drawerItemColor">@drawable/drawer_item_color_dark</item>
+        <item name="dividerColor">@color/items_divider_color_dark</item>
+        <item name="layoutRefresherColor">@color/layoutRefresherColorDark</item>
+    </style>
+
+    <style name="TextViewStyleDark" parent="android:Widget.TextView">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextViewStyleLight" parent="android:Widget.TextView">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="AlertDialogDark" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:background">@color/darkThemeColorPrimary</item>
+        <item name="background">@color/darkThemeColorPrimary</item>
+        <item name="colorAccent">@color/darkThemeColorAccent</item>
+    </style>
+
+    <style name="BottomSheetDialogLight" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="colorAccent">@color/darkThemeColorAccent</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="BottomSheetDialogDark" parent="Theme.Design.BottomSheetDialog">
+        <item name="android:colorBackground">@color/darkThemeColorPrimary</item>
+        <item name="colorAccent">@color/darkThemeColorAccent</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style
+        name="SplashTheme"
+        parent="Theme.AppCompat.NoActionBar">
+            <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
+</resources>

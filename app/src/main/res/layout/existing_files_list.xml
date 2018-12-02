@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/existingFilesListDivTop"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/dividerColor"
+        />
+
+    <ListView
+        android:id="@+id/existingFilesList"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:dividerHeight="0dp"
+        android:divider="@null"/>
+
+    <View
+        android:id="@+id/existingFilesListDivBottom"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/dividerColor"
+        />
+
+</LinearLayout>

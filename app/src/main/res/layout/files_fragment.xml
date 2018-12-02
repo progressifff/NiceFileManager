@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.SwipeRefreshLayout
+    android:id="@+id/filesListRefresher"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <include
+            android:id="@+id/noFilesMsgView"
+            layout="@layout/empty_folder_layout"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_gravity="center"
+            android:visibility="invisible"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/filesList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:scrollbarStyle="outsideOverlay"
+            android:paddingBottom="86dp"
+            android:clipToPadding="false"
+            app:fastScrollEnabled="true"
+            app:fastScrollHorizontalThumbDrawable="@drawable/fast_scroll_indicator"
+            app:fastScrollHorizontalTrackDrawable="@drawable/fast_scroll_line"
+            app:fastScrollVerticalThumbDrawable="@drawable/fast_scroll_indicator"
+            app:fastScrollVerticalTrackDrawable="@drawable/fast_scroll_line"
+            />
+
+
+
+        <ProgressBar
+            android:id="@+id/loadFilesProgressBar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="invisible"
+            android:layout_gravity="center"/>
+
+    </FrameLayout>
+
+</android.support.v4.widget.SwipeRefreshLayout>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1.0"
+            android:text="@string/destination_has_such_files"
+            android:layout_marginStart="16dp"
+            android:gravity="center_vertical"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            />
+
+        <ImageButton
+            android:id="@+id/showExistingFilesBtn"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center_vertical"
+            style="?android:attr/borderlessButtonStyle"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_info"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/dividerColor" />
+
+    <TextView
+        android:id="@+id/saveBothFilesBtn"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="center_vertical"
+        android:textSize="16sp"
+        android:text="@string/save_both_action"
+        android:clickable="true"
+        android:background="@drawable/click_ripple_effect"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        tools:ignore="RtlSymmetry"/>
+
+    <TextView
+        android:id="@+id/skipFilesBtn"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="center_vertical"
+        android:textSize="16sp"
+        android:text="@string/skip_action"
+        android:clickable="true"
+        android:background="@drawable/click_ripple_effect"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        tools:ignore="RtlSymmetry"/>
+
+    <TextView
+        android:id="@+id/rewriteFilesBtn"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="center_vertical"
+        android:textSize="16sp"
+        android:text="@string/rewrite_action"
+        android:clickable="true"
+        android:background="@drawable/click_ripple_effect"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        tools:ignore="RtlSymmetry"/>
+
+</LinearLayout>

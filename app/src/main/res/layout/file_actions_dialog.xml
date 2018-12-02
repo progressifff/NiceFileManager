@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp">
+
+        <ImageView
+            android:id="@+id/fileImage"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/ic_check"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"/>
+
+        <TextView
+            android:id="@+id/fileNameField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="32dp"
+            android:text="dummy"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            />
+
+        <ImageButton
+            android:id="@+id/fileDetailsBtn"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center_vertical"
+            style="?android:attr/borderlessButtonStyle"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_info"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/dividerColor" />
+
+    <android.support.v4.widget.NestedScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/renameFileBtn"
+                android:clickable="true"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:focusable="true"
+                android:background="@drawable/click_ripple_effect">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_rename"
+                    android:contentDescription="@null"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rename_menu_entry"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="16sp"
+                    android:layout_marginStart="32dp"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/deleteFileBtn"
+                android:clickable="true"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:focusable="true"
+                android:background="@drawable/click_ripple_effect">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_delete"
+                    android:contentDescription="@null"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/delete_menu_entry"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="16sp"
+                    android:layout_marginStart="32dp"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/copyFileBtn"
+                android:clickable="true"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:focusable="true"
+                android:background="@drawable/click_ripple_effect">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_content_copy"
+                    android:contentDescription="@null"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/copy_menu_entry"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="16sp"
+                    android:layout_marginStart="32dp"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cutFileBtn"
+                android:clickable="true"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:focusable="true"
+                android:background="@drawable/click_ripple_effect">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_content_cut"
+                    android:contentDescription="@null"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cut_menu_entry"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="16sp"
+                    android:layout_marginStart="32dp"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/shareFileBtn"
+                android:clickable="true"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:focusable="true"
+                android:background="@drawable/click_ripple_effect"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_share"
+                    android:contentDescription="@null"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/share_menu_entry"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="16sp"
+                    android:layout_marginStart="32dp"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</LinearLayout>

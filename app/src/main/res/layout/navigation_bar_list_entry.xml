@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent">
+<!--style="?android:attr/borderlessButtonStyle"-->
+    <!--android:background="@drawable/click_ripple_effect"-->
+    <TextView
+        android:id="@+id/navBarListEntryName"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:textAllCaps="false"
+        android:text="Dummy"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:padding="4dp"
+        />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_arrow_right"
+        android:contentDescription="@null"
+        />
+
+</LinearLayout>

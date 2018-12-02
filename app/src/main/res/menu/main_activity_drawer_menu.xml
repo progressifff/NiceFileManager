@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:showIn="navigation_view">
+
+    <item android:title="@string/storage">
+        <menu>
+            <group
+                android:id="@+id/storage_group"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/root_storage"
+                    android:title="@string/root_storage_name"
+                    android:icon="@drawable/ic_root_directory"/>
+                <item
+                    android:id="@+id/internal_storage"
+                    android:title="@string/internal_storage_name"
+                    android:icon="@drawable/ic_internal_storage"/>
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="@string/media">
+        <menu>
+            <group
+                android:id="@+id/media_group"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/downloads"
+                    android:title="@string/downloads_dir"
+                    android:icon="@drawable/ic_downloads"/>
+                <item
+                    android:id="@+id/pictures"
+                    android:title="@string/pictures_dir"
+                    android:icon="@drawable/ic_pictures"/>
+                <item
+                    android:id="@+id/movies"
+                    android:title="@string/movies_dir"
+                    android:icon="@drawable/ic_videos"/>
+                <item
+                    android:id="@+id/music"
+                    android:title="@string/music_dir"
+                    android:icon="@drawable/ic_music"/>
+                <item
+                    android:id="@+id/dcim"
+                    android:title="@string/dcim_dir"
+                    android:icon="@drawable/ic_dcim"/>
+                <item
+                    android:id="@+id/documents"
+                    android:title="@string/documents_dir"
+                    android:icon="@drawable/ic_documents"/>
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/settings"
+        android:title="@string/settings"
+        android:icon="@drawable/ic_settings"/>
+
+</menu>

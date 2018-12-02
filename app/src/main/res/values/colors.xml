@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorPrimary">#ffffff</color>
+    <color name="colorPrimaryDark">#8b8b8b</color>
+    <color name="colorAccent">#369eda</color>
+
+    <color name="darkThemeColorPrimary">#292929</color>
+    <color name="darkThemeColorPrimaryDark">#181818</color>
+    <color name="darkThemeColorAccent">#369eda</color>
+
+    <color name="iconColorDark">#FFFFFFFF</color>
+    <color name="iconColorLight">#8F000000</color>
+    <color name="secondaryTextColorDark">#9a9c9f</color>
+    <color name="secondaryTextColorLight">#8F000000</color>
+    <color name="selectedFilesItemColorDark">#2FFFFFFF</color>
+    <color name="selectedFilesItemColorLight">#2F000000</color>
+
+    <color name="drawer_item_light_color">#363636</color>
+    <color name="items_divider_color_light">#88e7e7e7</color>
+    <color name="items_divider_color_dark">#484848</color>
+
+    <color name="layoutRefresherColorLight">#FFFFFFFF</color>
+    <color name="layoutRefresherColorDark">#101010</color>
+
+</resources>

@@ -1,0 +1,15 @@
+<?xml
+    version="1.0"
+    encoding="utf-8"?>
+
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="?attr/colorPrimary" />
+    <!--<item>-->
+        <!--<bitmap-->
+            <!--android:src="@drawable/ic_folder_white"-->
+            <!--android:gravity = "center"-->
+             <!--/>-->
+    <!--</item>-->
+</layer-list>

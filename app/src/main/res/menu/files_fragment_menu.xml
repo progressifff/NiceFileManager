@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_more"
+        android:title="@string/more_options_title"
+        android:icon="@drawable/ic_more"
+        app:showAsAction="always">
+
+        <menu>
+            <item
+                 android:id="@+id/sortType"
+                 android:title="@string/sort_title"
+                 app:showAsAction="always"/>
+
+            <item
+                android:id="@+id/showHiddenFiles"
+                android:checked="false"
+                android:checkable="true"
+                android:title="@string/show_hidden_files"/>
+
+            <item
+                android:id="@+id/paste"
+                android:title="@string/paste_action"/>
+
+        </menu>
+    </item>
+</menu>

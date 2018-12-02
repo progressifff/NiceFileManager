@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    >
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/mainActivityContent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity"
+        >
+
+        <!--Application toolbar-->
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <include
+                android:id="@+id/mainActivityToolBar"
+                layout="@layout/toolbar"
+                />
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/navigationBar"
+                android:layout_height="42dp"
+                android:layout_width="match_parent"
+                android:layout_marginStart="16dp"
+                >
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/navigationBarList"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintEnd_toStartOf="@+id/filesOrderModeBtn"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                </android.support.v7.widget.RecyclerView>
+
+                <ImageButton
+                    android:id="@+id/filesOrderModeBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_arrow_upward"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/filesDisplayModeBtn"
+                    />
+
+                <ImageButton
+                    android:id="@+id/filesDisplayModeBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_grid_on"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="12dp"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    />
+
+            </android.support.constraint.ConstraintLayout>
+        </android.support.design.widget.AppBarLayout>
+
+        <FrameLayout
+            android:id="@+id/contentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            />
+
+        <include
+            android:id="@+id/filesTasks"
+            layout="@layout/files_tasks"
+            />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/addFolderFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_anchor="@+id/filesTasks"
+            app:layout_anchorGravity="top|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_create_new_folder"
+            />
+
+    </android.support.design.widget.CoordinatorLayout>
+
+    <com.progressifff.materialsearchview.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:hint="@string/search_hint"
+        />
+</merge>

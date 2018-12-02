@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true"
+    app:cardCornerRadius="10dp"
+    android:background="?attr/colorPrimary"
+    android:layout_width="@dimen/file_card_width"
+    android:layout_height="126dp"
+    android:clickable="true"
+    android:focusable="true"
+    >
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/storageFileEntry"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/selectedFilesDrawable"
+        >
+
+        <ImageView
+            android:id="@+id/fileImage"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_file"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/row"
+            />
+
+        <LinearLayout
+            android:id="@+id/row"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+
+            <TextView
+                android:id="@+id/storageFileName"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:paddingTop="8dp"
+                android:paddingStart="8dp"
+                android:paddingBottom="8dp"
+                android:ellipsize="end"
+                android:textSize="10sp"
+                android:maxLines="2"
+                android:gravity="center_vertical"
+                tools:ignore="RtlSymmetry,SmallSp"/>
+
+            <ImageButton
+                android:id="@+id/fileMoreBtn"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@null"
+                android:background="@drawable/click_ripple_circle_effect"
+                android:src="@drawable/ic_more"
+                />
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.v7.widget.CardView>

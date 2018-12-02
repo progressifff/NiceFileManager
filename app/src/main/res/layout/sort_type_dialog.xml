@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/addNewItemHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:textAlignment="gravity"
+        android:gravity="center_vertical"
+        android:text="@string/sort_title"
+        android:textSize="16sp"
+        android:layout_marginStart="16dp"
+        />
+
+    <android.support.v4.widget.NestedScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <LinearLayout
+                android:id="@+id/sortByNameItem"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:clickable="true"
+                android:background="@drawable/click_ripple_effect"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:text="@string/sort_by_name"/>
+
+                <ImageView
+                    android:id="@+id/sortByNameItemChecker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_check"
+                    android:layout_marginEnd="16dp"
+                    android:visibility="invisible"
+                    android:contentDescription="@null"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sortByTypeItem"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:clickable="true"
+                android:background="@drawable/click_ripple_effect"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:text="@string/sort_by_type"/>
+
+                <ImageView
+                    android:id="@+id/sortByTypeItemChecker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_check"
+                    android:layout_marginEnd="16dp"
+                    android:visibility="invisible"
+                    android:contentDescription="@null"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sortByModificationTimeItem"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:clickable="true"
+                android:background="@drawable/click_ripple_effect"
+                android:focusable="true">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:text="@string/sort_by_modification_time"/>
+
+                <ImageView
+                    android:id="@+id/sortByModificationTimeItemChecker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_check"
+                    android:layout_marginEnd="16dp"
+                    android:visibility="invisible"
+                    android:contentDescription="@null"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sortBySizeItem"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:clickable="true"
+                android:background="@drawable/click_ripple_effect"
+                android:focusable="true">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:text="@string/sort_by_size"/>
+
+                <ImageView
+                    android:id="@+id/sortBySizeItemChecker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_check"
+                    android:layout_marginEnd="16dp"
+                    android:visibility="invisible"
+                    android:contentDescription="@null"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</LinearLayout>

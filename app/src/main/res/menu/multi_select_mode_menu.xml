@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_delete"
+          android:title="@string/delete_menu_entry"
+          android:icon="@drawable/ic_delete"
+          app:showAsAction="always" />
+
+    <item android:id="@+id/action_copy"
+          android:title="@string/copy_menu_entry"
+          android:icon="@drawable/ic_content_copy"
+          app:showAsAction="always" />
+
+    <item android:id="@+id/action_cut"
+          android:title="@string/cut_menu_entry"
+          android:icon="@drawable/ic_content_cut"
+          app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_more"
+        android:title="@string/more_options_title"
+        android:icon="@drawable/ic_more"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_select_all"
+                android:title="@string/select_all_title"
+                />
+        </menu>
+    </item>
+
+</menu>

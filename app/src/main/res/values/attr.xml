@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="iconColor" format="color"/>
+    <attr name="secondaryTextColor" format="color"/>
+    <attr name="selectedFilesDrawable" format="reference"/>
+    <attr name="drawerItemColor" format="reference"/>
+    <attr name="dividerColor" format="color"/>
+    <attr name="layoutRefresherColor" format="color"/>
+</resources>

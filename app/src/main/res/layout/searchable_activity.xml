@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    tools:context=".SearchableActivity">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:padding="0dp"
+        >
+
+        <LinearLayout
+            android:id="@+id/noFilesFoundTextView"
+            android:orientation="vertical"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="20dp"
+                android:layout_weight="1"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_search_blue"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textSize="16sp"
+                android:text="@string/no_files_found"
+                />
+
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/searchResultList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layoutAnimation="@anim/files_list_layout_animation"
+            android:scrollbars="vertical"
+            app:fastScrollEnabled="true"
+            app:fastScrollHorizontalThumbDrawable="@drawable/fast_scroll_indicator"
+            app:fastScrollHorizontalTrackDrawable="@drawable/fast_scroll_line"
+            app:fastScrollVerticalThumbDrawable="@drawable/fast_scroll_indicator"
+            app:fastScrollVerticalTrackDrawable="@drawable/fast_scroll_line"
+            >
+        </android.support.v7.widget.RecyclerView>
+
+        <ProgressBar
+            android:id="@+id/searchFilesProgressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-5dp"
+            android:indeterminate="true"
+            android:visibility="gone"
+            android:layout_gravity="top"/>
+
+        <include
+            android:id="@+id/searchedFilesTasks"
+            layout="@layout/files_tasks"
+            />
+
+    </android.support.design.widget.CoordinatorLayout>
+
+    <com.progressifff.materialsearchview.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:isAlwaysVisible="true"
+        custom:hint="@string/search_hint"
+        />
+
+</merge>
