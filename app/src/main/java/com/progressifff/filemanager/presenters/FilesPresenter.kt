@@ -68,32 +68,10 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
     private lateinit var orderModeEventListenerDisposable: Disposable
     private lateinit var sortTypeEventListenerDisposable: Disposable
 
-    init {
-        initRxEventsListeners()
-    }
-
     override fun bindView(@NonNull v: FilesView){
         super.bindView(v)
         if(multiSelectMode.running){ view!!.startActionMode(multiSelectMode) }
         FilesClipboard.instance.filesClipboardListener = clipboardListener
-        initRxEventsListeners()
-        view!!.update(false)
-        view!!.invalidateMenuOptions()
-    }
-
-    override fun unbindView() {
-        if(multiSelectMode.running){
-            multiSelectMode.saveState()
-        }
-        navigateEventListenerDisposable.dispose()
-        navDrawerStateListenerDisposable.dispose()
-        displayModeEventListenerDisposable.dispose()
-        orderModeEventListenerDisposable.dispose()
-        sortTypeEventListenerDisposable.dispose()
-        super.unbindView()
-    }
-
-    private fun initRxEventsListeners(){
 
         navigateEventListenerDisposable = RxBus.listen(
                 RxEvent.NavigateEvent::class.java).
@@ -114,6 +92,21 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
         sortTypeEventListenerDisposable = RxBus.listen(
                 RxEvent.FilesSortTypeChangedEvent::class.java).
                 subscribe{event -> model.sortFilesType = event.sortType}
+
+        view!!.update(false)
+        view!!.invalidateMenuOptions()
+    }
+
+    override fun unbindView() {
+        if(multiSelectMode.running){
+            multiSelectMode.saveState()
+        }
+        navigateEventListenerDisposable.dispose()
+        navDrawerStateListenerDisposable.dispose()
+        displayModeEventListenerDisposable.dispose()
+        orderModeEventListenerDisposable.dispose()
+        sortTypeEventListenerDisposable.dispose()
+        super.unbindView()
     }
 
     override fun onRefresh() {
@@ -148,7 +141,7 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
                 model.sort()
             }
             else{
-                view?.update(true, true)
+                view?.update(true)
             }
         }
 

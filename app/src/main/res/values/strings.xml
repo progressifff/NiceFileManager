@@ -1,6 +1,6 @@
 <resources>
     <!--General-->
-    <string name="app_name">FileManager</string>
+    <string name="app_name">File Manager</string>
     <string name="search_hint">Type to search</string>
     <string name="no_storage_access">Cannot access files.</string>
     <string name="storage_permissions_rationale">Cannot access files.\nFileManager needs the storage permissions to access files.</string>
@@ -111,7 +111,8 @@
     <string name="files">files</string>
     <string name="from">from</string>
     <string name="to">to</string>
-    <string name="tasks_title">tasks</string>
+    <string name="tasks">tasks</string>
+    <string name="task">task</string>
     <string name="calculating_files_size">Calculating files size…</string>
 
     <string name="destination_has_such_files">"The destination already has such files"</string>

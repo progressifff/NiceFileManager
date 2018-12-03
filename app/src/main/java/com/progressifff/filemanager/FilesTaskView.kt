@@ -40,7 +40,7 @@ class FilesTaskView(@IdRes val viewId: Int) : IFilesTasksView{
 
         filesTasksTitle = activity.findViewById(R.id.filesTasksTitle)
 
-        filesTasksTitle.text = presenter.tasksCount.toString()
+        updateFilesTasksTitle()
 
         val tasksView = activity.findViewById<LinearLayout>(viewId)
 
@@ -111,12 +111,12 @@ class FilesTaskView(@IdRes val viewId: Int) : IFilesTasksView{
     override fun notifyFileTaskAdded() {
         showFilesTasksView()
         val filesTasksCounts = presenter.tasksCount
-        filesTasksTitle.text = filesTasksCounts.toString()
+        updateFilesTasksTitle()
         filesTasksListAdapter.notifyItemInserted(filesTasksCounts - 1)
     }
 
     override fun removeFileTask(taskIndex: Int) {
-        filesTasksTitle.text = presenter.tasksCount.toString()
+        updateFilesTasksTitle()
         filesTasksListAdapter.notifyItemRemoved(taskIndex)
         if(presenter.tasksCount == 0){
             hideFilesTaskView()
@@ -132,6 +132,12 @@ class FilesTaskView(@IdRes val viewId: Int) : IFilesTasksView{
         if(!filesTasksList.itemAnimator!!.isRunning) {
             filesTasksListAdapter.notifyItemChanged(taskIndex)
         }
+    }
+
+    private fun updateFilesTasksTitle(){
+        val tasksCount = presenter.tasksCount
+        val title = if(tasksCount > 1) "$tasksCount ${getStringFromRes(R.string.tasks)}" else "$tasksCount ${getStringFromRes(R.string.task)}"
+        filesTasksTitle.text = title
     }
 
     companion object {

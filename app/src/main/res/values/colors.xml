@@ -23,4 +23,5 @@
     <color name="layoutRefresherColorLight">#FFFFFFFF</color>
     <color name="layoutRefresherColorDark">#101010</color>
 
+    <color name="ic_launcher_background">#369EDA</color>
 </resources>
