@@ -70,7 +70,7 @@ class FilesFragment : Fragment(), FilesView {
         filesList = root.findViewById(R.id.filesList)
         filesListAdapter = FilesListAdapter(presenter)
         filesListLinearLayoutManager = LinearLayoutManager(context)
-        filesListGridLayoutManager = GridLayoutManager(context, 1)
+        filesListGridLayoutManager = GridLayoutManager(context, calculateGridColumnsCount())
         filesListGridLayoutDecoration = RecyclerViewGridLayoutDecoration()
 
         filesList.apply{
@@ -85,13 +85,14 @@ class FilesFragment : Fragment(), FilesView {
             }
         })
 
-        filesListGridLayoutManager.spanCount = calculateGridColumnsCount()
-
         if(savedInstanceState != null){
             val filesDisplayMode = MainPresenter.FilesDisplayMode.fromString(getStringFromSharedPreferences(Constants.FILES_DISPLAY_MODE_KEY, MainPresenter.FilesDisplayMode.LIST.name))
             when(filesDisplayMode){
                 MainPresenter.FilesDisplayMode.LIST -> filesList.layoutManager = filesListLinearLayoutManager
-                MainPresenter.FilesDisplayMode.GRID -> filesList.layoutManager = filesListGridLayoutManager
+                MainPresenter.FilesDisplayMode.GRID -> {
+                    filesList.layoutManager = filesListGridLayoutManager
+                    filesList.addItemDecoration(filesListGridLayoutDecoration)
+                }
             }
         }
         filesList.runOnLayoutChanged { setupToolBarScrollingBehavior(filesList.isScrollable) }

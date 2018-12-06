@@ -82,8 +82,8 @@ class NavigationManager {
     fun previous(): NavigationEntry? {
         return when {
             navigationStack.isNotEmpty() -> navigationStack.first().entries.last()
-            statesStack.isNotEmpty() -> statesStack.first().navigationEntries.last()
             navigationEntries.size > 1 -> navigationEntries[navigationEntries.size - 2]
+            statesStack.isNotEmpty() -> statesStack.first().navigationEntries.last()
             else -> null
         }
     }

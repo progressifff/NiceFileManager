@@ -268,6 +268,7 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun setCheckedDrawerMenuItem(menuItemId: Int) {
         navigationView.menu.uncheckItems()
         navigationView.menu.findItem(menuItemId).isChecked = true
+        navigationView.invalidate()
     }
 
     override fun setFilesDisplayModeButton(filesDisplayMode: MainPresenter.FilesDisplayMode) {

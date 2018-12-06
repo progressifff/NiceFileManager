@@ -41,15 +41,6 @@
                 android:value=".MainActivity" />
         </activity>
 
-        <receiver android:name=".StorageMediaMountReceiver">
-            <intent-filter>
-                <action android:name="android.intent.actionCopy.MEDIA_MOUNTED"/>
-                <action android:name="android.intent.actionCopy.MEDIA_UNMOUNTED"/>
-
-                <data android:scheme="file"/>
-            </intent-filter>
-        </receiver>
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}"

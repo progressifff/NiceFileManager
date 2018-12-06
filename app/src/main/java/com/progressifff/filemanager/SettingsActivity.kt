@@ -4,7 +4,6 @@ import android.app.Activity
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.preference.PreferenceFragmentCompat
-import android.util.Log
 import android.content.pm.PackageManager
 import android.support.v7.preference.PreferenceScreen
 import android.support.v7.widget.Toolbar
@@ -61,8 +60,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.settings, rootKey)
 
         val useDarkThemePref = findPreference(USE_DARK_THEME_KEY)
-        useDarkThemePref.setOnPreferenceChangeListener { preference, any ->
-            Log.v(SettingsActivity::class.java.name, "$preference  $any")
+        useDarkThemePref.setOnPreferenceChangeListener { _, _ ->
             activity!!.recreate()
             return@setOnPreferenceChangeListener true
         }
@@ -72,7 +70,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         try {
             val packageInfo = activity!!.packageManager.getPackageInfo(activity!!.packageName, 0)
             appVersionPref.summary = packageInfo.versionName
-            Log.v(SettingsActivity::class.java.name, packageInfo.versionName)
 
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()

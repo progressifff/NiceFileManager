@@ -9,8 +9,7 @@ class RecyclerViewGridLayoutDecoration : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
         super.getItemOffsets(outRect, view, parent, state)
-        val resources = App.get().resources
-        val fileCardWidth = resources.getDimensionPixelSize(R.dimen.file_card_width)
+        val fileCardWidth = App.get().resources.getDimensionPixelSize(R.dimen.file_card_width)
         val columnsCount = (parent.layoutManager as GridLayoutManager).spanCount
 
         assert(columnsCount != 0)
