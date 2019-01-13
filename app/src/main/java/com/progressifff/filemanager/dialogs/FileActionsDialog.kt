@@ -10,7 +10,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.progressifff.filemanager.*
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractStorageFile
 import java.lang.ref.WeakReference
 
 class FileActionsDialog : BottomSheetDialogFragment(), View.OnClickListener {
@@ -24,7 +24,7 @@ class FileActionsDialog : BottomSheetDialogFragment(), View.OnClickListener {
         file = arguments!!.getParcelable(FILE_KEY) as AbstractStorageFile
         view.findViewById<TextView>(R.id.fileNameField).text = file.name
 
-        FileDrawableLoader.instance.applyFileImage(file, WeakReference(view.findViewById(R.id.fileImage)))
+        FileImageManager.applyFileImage(file, WeakReference(view.findViewById(R.id.fileImage)))
 
         if(!file.isDirectory){
             val shareFileBtn = view.findViewById<LinearLayout>(R.id.shareFileBtn)

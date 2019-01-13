@@ -28,12 +28,17 @@ class NavigationEntriesAdapter(val mainPresenter: MainPresenter) : RecyclerView.
             listEntryTextView.setOnClickListener {mainPresenter.onNavigationBarItemClicked(adapterPosition)}
         }
 
-        override fun setEntryName(entryName: String) {
+        override fun setName(entryName: String) {
             listEntryTextView.text = entryName
+        }
+
+        override fun getName(): String{
+            return listEntryTextView.text.toString()
         }
     }
 
     interface NavigationBarEntryView {
-        fun setEntryName(entryName: String)
+        fun setName(entryName: String)
+        fun getName(): String
     }
 }

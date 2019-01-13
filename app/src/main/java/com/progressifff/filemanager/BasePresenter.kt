@@ -1,4 +1,4 @@
-package com.progressifff.filemanager.presenters
+package com.progressifff.filemanager
 
 import android.support.annotation.CallSuper
 import io.reactivex.annotations.NonNull

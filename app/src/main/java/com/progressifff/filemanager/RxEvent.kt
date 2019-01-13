@@ -2,8 +2,8 @@ package com.progressifff.filemanager
 
 import android.os.Parcelable
 import com.progressifff.filemanager.dialogs.FileActionsDialog
-import com.progressifff.filemanager.models.AbstractFilesNode
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractFilesNode
+import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.presenters.MainPresenter
 
 class RxEvent {

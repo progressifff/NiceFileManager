@@ -9,13 +9,13 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.Toast
 import com.progressifff.filemanager.Constants.RESULT_SEARCHED_FOLDER_OPEN
 import com.progressifff.filemanager.Constants.USE_DARK_THEME_KEY
 import com.progressifff.filemanager.dialogs.DeleteFilesDialog
 import com.progressifff.filemanager.dialogs.FileActionsDialog
 import com.progressifff.filemanager.dialogs.FileDetailsDialog
 import com.progressifff.filemanager.dialogs.RenameStorageFileDialog
-import com.progressifff.filemanager.models.AbstractStorageFile
 import com.progressifff.filemanager.presenters.MainPresenter
 import com.progressifff.filemanager.presenters.SearchedFilesPresenter
 import com.progressifff.filemanager.views.SearchedFilesView
@@ -24,20 +24,14 @@ import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 
 class SearchableActivity : AppCompatActivity(), SearchedFilesView {
-    override fun showDeleteFilesDialog(filesCount: Int) {
-        val dialog = DeleteFilesDialog.createInstance(filesCount)
-        dialog.show(supportFragmentManager, DeleteFilesDialog::class.java.name)
-    }
-
     private lateinit var noFilesMessage: LinearLayout
     private lateinit var searchFilesProgressBar: ProgressBar
     private lateinit var searchView: com.progressifff.materialsearchview.SearchView
     private lateinit var searchedFilesList: RecyclerView
     private lateinit var searchedFilesListAdapter: RecyclerView.Adapter<*>
     private lateinit var presenter: SearchedFilesPresenter
-    private val filesTaskView = FilesTaskView(R.id.searchedFilesTasks)
+    private val filesTaskView = FilesTasks(R.id.searchedFilesTasks)
     private var query: String? = null
-
     private val searchViewListener = object : com.progressifff.materialsearchview.SearchView.SearchViewListener{
         override fun onBackButtonPressed() {
             RxBus.clearHistory()
@@ -48,7 +42,7 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
 
         override fun onSuggestionsVisibilityChanged(visible: Boolean) {
             if(visible){
-               updateSuggestions()
+                updateSuggestions()
             }
         }
 
@@ -66,53 +60,35 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-
-        if(preferences.getBoolean(USE_DARK_THEME_KEY, false)){
-            setTheme(R.style.AppThemeDark)
-        }
-        else{
-            setTheme(R.style.AppThemeLight)
-        }
-
-        RxBus.clearHistory()
-
+        if(preferences.getBoolean(USE_DARK_THEME_KEY, false)) setTheme(R.style.AppThemeDark) else setTheme(R.style.AppThemeLight)
         setContentView(R.layout.searchable_activity)
-
+        RxBus.clearHistory()
         //Find noFilesMessage
-        noFilesMessage = findViewById(R.id.noFilesFoundTextView)
-
+        noFilesMessage = findViewById(R.id.noFilesFoundView)
         searchFilesProgressBar = findViewById(R.id.searchFilesProgressBar)
         searchView = findViewById(R.id.searchView)
         searchView.searchViewListener = searchViewListener
 
         val folder = intent.getParcelableExtra<AbstractStorageFile>(SEARCH_ROOT_FOLDER_KEY)
-
         presenter = if(savedInstanceState == null){
             query = intent.getStringExtra(SEARCH_QUERY)
-
             searchView.setQueryText(query!!)
             //Save search suggestions
             saveSuggestion(query!!)
-
             updateSuggestions()
-
             //Create presenter
-            SearchedFilesPresenter(folder)
+            SearchedFilesPresenter(folder, RxBus, FilesClipboard, FileImageManager)
         }
         else try{
-            PresenterManager.instance.restorePresenter<SearchedFilesPresenter>(savedInstanceState)
+            PresenterManager.restorePresenter<SearchedFilesPresenter>(savedInstanceState)
         }
         catch (e: Exception){
             e.printStackTrace()
-            SearchedFilesPresenter(folder)
+            SearchedFilesPresenter(folder, RxBus, FilesClipboard, FileImageManager)
         }
-
         setupSearchResultList()
-
         filesTaskView.onActivityCreate(this, savedInstanceState)
-
     }
 
     override fun onStart() {
@@ -134,7 +110,7 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        PresenterManager.instance.savePresenter(presenter, outState)
+        PresenterManager.savePresenter(presenter, outState)
         filesTaskView.onSaveInstance(outState)
     }
 
@@ -145,21 +121,14 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
             adapter = searchedFilesListAdapter
         }
 
-        val filesDisplayMode = MainPresenter.FilesDisplayMode.fromString(getStringFromSharedPreferences(Constants.FILES_DISPLAY_MODE_KEY, MainPresenter.FilesDisplayMode.LIST.name))
+        val filesDisplayMode = MainPresenter.FilesDisplayMode.fromString(AppPreferences.getString(Constants.FILES_DISPLAY_MODE_KEY, MainPresenter.FilesDisplayMode.LIST.name))
 
         when(filesDisplayMode){
             MainPresenter.FilesDisplayMode.GRID -> {
-                val gridLayoutManager = GridLayoutManager(this, 1)
-                searchedFilesList.layoutManager = gridLayoutManager
+                searchedFilesList.layoutManager = GridLayoutManager(this, Utils.calculateGridColumnsCount())
                 searchedFilesList.addItemDecoration(RecyclerViewGridLayoutDecoration())
-                searchedFilesList.runOnLayoutChanged {
-                    gridLayoutManager.spanCount = calculateGridColumnsCount()
-                    searchedFilesListAdapter.notifyDataSetChanged()
-                }
             }
-            MainPresenter.FilesDisplayMode.LIST -> {
-                searchedFilesList.layoutManager = LinearLayoutManager(this)
-            }
+            MainPresenter.FilesDisplayMode.LIST -> searchedFilesList.layoutManager = LinearLayoutManager(this)
         }
     }
 
@@ -192,7 +161,7 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
                 })
     }
 
-    override fun resetFilesList() {
+    override fun updateFilesList() {
         searchedFilesListAdapter.notifyDataSetChanged()
     }
 
@@ -216,10 +185,10 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
         if(presenter.getFilesCount() == 0){
             showNoFilesMsg()
         }
-        else if(!searchedFilesList.visible){
+        else {
             showFilesList()
         }
-        searchedFilesListAdapter.notifyDataSetChanged()
+        //searchedFilesListAdapter.notifyDataSetChanged()
     }
 
     override fun showFilesList(){
@@ -255,7 +224,7 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
         }
     }
 
-    override fun postResult(folder: AbstractStorageFile) {
+    override fun openFolder(folder: AbstractStorageFile) {
         val resultIntent = Intent()
         resultIntent.putExtra(RESULT_FOLDER, folder)
         this.setResult(RESULT_SEARCHED_FOLDER_OPEN, resultIntent)
@@ -271,8 +240,23 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
     }
 
     override fun showRenameFileDialog(file: AbstractStorageFile) {
-        val renameDialog = RenameStorageFileDialog.createInstance(file)
-        renameDialog.show(supportFragmentManager, RenameStorageFileDialog::class.java.name)
+        RenameStorageFileDialog.createInstance(file).show(supportFragmentManager, RenameStorageFileDialog::class.java.name)
+    }
+
+    override fun showShareDialog(file: AbstractStorageFile) {
+        Utils.showShareFileDialog(this, file)
+    }
+
+    override fun showOpenFileDialog(file: AbstractStorageFile) {
+        Utils.showOpenFileDialog(this, file)
+    }
+
+    override fun showToast(messageId: Int) {
+        Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show()
+    }
+
+    override fun showDeleteFilesDialog(filesCount: Int) {
+        DeleteFilesDialog.createInstance(filesCount).show(supportFragmentManager, DeleteFilesDialog::class.java.name)
     }
 
     companion object {

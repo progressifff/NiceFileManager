@@ -10,6 +10,7 @@ import com.progressifff.filemanager.RxBus
 import com.progressifff.filemanager.RxEvent
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
+import java.lang.AssertionError
 
 class DeleteFilesDialog : DialogFragment() {
 
@@ -19,7 +20,9 @@ class DeleteFilesDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialogBuilder = AlertDialog.Builder(activity)
         val filesCount = arguments!!.getInt(FILES_COUNT_LEY)
-        assert(filesCount > 0)
+        if(filesCount < 0){
+            throw AssertionError("No files to delete")
+        }
 
         if(filesCount == 1){
             dialogBuilder.setMessage(R.string.delete_file_question)

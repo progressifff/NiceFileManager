@@ -11,7 +11,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.progressifff.filemanager.R
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.models.StorageFile
 import com.progressifff.filemanager.toGB
 import com.progressifff.filemanager.toKB

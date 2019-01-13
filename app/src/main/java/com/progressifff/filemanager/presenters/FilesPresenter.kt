@@ -8,15 +8,18 @@ import android.view.MenuItem
 import android.view.View
 import com.progressifff.filemanager.*
 import com.progressifff.filemanager.Constants.SHOW_HIDDEN_FILES_KEY
-import com.progressifff.filemanager.models.AbstractFilesNode
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractFilesNode
+import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.models.FilesNode
-import com.progressifff.filemanager.views.FilesView
+import com.progressifff.filemanager.views.NestedFilesView
 import io.reactivex.disposables.Disposable
 import kotlin.collections.ArrayList
 
-class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
-                                                SwipeRefreshLayout.OnRefreshListener{
+class FilesPresenter(private val appPreferences: Preferences,
+                     eventBus: RxBus,
+                     filesClipboard: FilesClipboard,
+                     fileImageLoader: FileImageLoader) : AbstractFilesPresenter<AbstractFilesNode, NestedFilesView>(eventBus, filesClipboard, fileImageLoader),
+                                                         SwipeRefreshLayout.OnRefreshListener{
 
     override lateinit var model: AbstractFilesNode
 
@@ -42,23 +45,21 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
             view?.update(true, true)
         }
 
-        override fun onError(msg: String) {
-            showToast(msg)
+        override fun onError(messageId: Int) {
+            view?.showToast(messageId)
             view?.showNoFilesMsg()
         }
     }
 
     private val clipboardListener = object: FilesClipboard.FilesClipboardListener{
         override fun onClipDataChanged() {
-            view?.invalidateMenuOptions()
+            view?.invalidateMenu()
         }
     }
 
-    override val multiSelectMode = MultiSelectMode(this)
-
     val onViewClickListener = View.OnClickListener {v->
         when(v.id){
-            R.id.addFolderFab -> view!!.showCreateFolderDialog(model.source)
+            R.id.addFolderFab -> view!!.showCreateFolderDialog(model.folder)
         }
     }
 
@@ -68,33 +69,36 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
     private lateinit var orderModeEventListenerDisposable: Disposable
     private lateinit var sortTypeEventListenerDisposable: Disposable
 
-    override fun bindView(@NonNull v: FilesView){
-        super.bindView(v)
-        if(multiSelectMode.running){ view!!.startActionMode(multiSelectMode) }
-        FilesClipboard.instance.filesClipboardListener = clipboardListener
+    init { multiSelectMode.eventsListener = this }
 
-        navigateEventListenerDisposable = RxBus.listen(
+    override fun bindView(@NonNull v: NestedFilesView){
+        super.bindView(v)
+
+        if(multiSelectMode.running){ view!!.startActionMode(multiSelectMode) }
+
+        filesClipboard.filesClipboardListener = clipboardListener
+
+        navigateEventListenerDisposable = eventBus.listen(
                 RxEvent.NavigateEvent::class.java).
                 subscribe(::onNavigateEvent)
 
-        navDrawerStateListenerDisposable = RxBus.listen(
+        navDrawerStateListenerDisposable = eventBus.listen(
                 RxEvent.NavigationDrawerStateChangedEvent::class.java).
                 subscribe(::onNavigationDrawerStateChangedEvent)
 
-        displayModeEventListenerDisposable = RxBus.listen(
+        displayModeEventListenerDisposable = eventBus.listen(
                 RxEvent.FilesDisplayModeChangedEvent::class.java).
                 subscribe(::onFilesDisplayModeChangedEvent)
 
-        orderModeEventListenerDisposable = RxBus.listen(
+        orderModeEventListenerDisposable = eventBus.listen(
                 RxEvent.FilesOrderModeChangedEvent::class.java).
                 subscribe(::onFilesOrderModeChangedEvent)
 
-        sortTypeEventListenerDisposable = RxBus.listen(
+        sortTypeEventListenerDisposable = eventBus.listen(
                 RxEvent.FilesSortTypeChangedEvent::class.java).
-                subscribe{event -> model.sortFilesType = event.sortType}
+                subscribe(::filesSortTypeChangedEvent)
 
         view!!.update(false)
-        view!!.invalidateMenuOptions()
     }
 
     override fun unbindView() {
@@ -123,14 +127,13 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
         if(!::model.isInitialized){
             changeModel(event.filesNode)
             model.load()
-            model.sort()
         }
         else{
             val isModelSortRequired = (event.filesNode.sortFilesType != model.sortFilesType ||
                     event.filesNode.isDescendingSort != model.isDescendingSort)
 
             val isModelUpdateRequired = (event.filesNode is FilesNode && model is FilesNode) &&
-                                        (event.filesNode.hiddenFilesAreShown != (model as FilesNode).hiddenFilesAreShown)
+                                        (event.filesNode.includeHiddenFiles != (model as FilesNode).includeHiddenFiles)
 
             changeModel(event.filesNode)
 
@@ -141,7 +144,7 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
                 model.sort()
             }
             else{
-                view?.update(true)
+                view?.update()
             }
         }
 
@@ -154,10 +157,8 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
                 multiSelectMode.hide()
             }
         }
-        else{
-            if(multiSelectMode.hidden) {
-                view?.startActionMode(multiSelectMode)
-            }
+        else if(multiSelectMode.hidden) {
+            view?.startActionMode(multiSelectMode)
         }
     }
 
@@ -168,28 +169,33 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
         }
     }
 
+    private fun filesSortTypeChangedEvent(event: RxEvent.FilesSortTypeChangedEvent){
+        model.sortFilesType = event.sortType
+        appPreferences.saveString(Constants.SORT_TYPE_KEY, event.sortType.name)
+    }
+
     private fun onFilesOrderModeChangedEvent(event: RxEvent.FilesOrderModeChangedEvent){
         model.isDescendingSort = event.orderMode == MainPresenter.FilesOrderMode.DESCENDING
     }
 
-    override fun onFileListEntryClicked(index: Int, filesListState: Parcelable) {
+    override fun onFilesListEntryClicked(index: Int, filesListState: Parcelable) {
         try{
             val file = model.get(index)
 
             if(!multiSelectMode.running){
                 if(file.isDirectory){
-                    val filesNode = FilesNode(file)
-                    RxBus.publish(RxEvent.OpenFolderEvent(filesNode))
-                    RxBus.publish(RxEvent.SaveFilesStateEvent(model, filesListState))
+                    val filesNode = AbstractFilesNode.create(file)
+                    eventBus.publish(RxEvent.OpenFolderEvent(filesNode))
+                    eventBus.publish(RxEvent.SaveFilesStateEvent(model, filesListState))
                     changeModel(filesNode)
                     model.load()
                 }
                 else {
                     try{
-                        file.openAsFile()
+                        view!!.showOpenFileDialog(file)
                     }
                     catch (e: Exception){
-                        showToast(App.get().getString(R.string.open_file_error))
+                        view!!.showToast(R.string.open_file_error)
                     }
                 }
             }
@@ -214,21 +220,20 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
 
     override fun getFilesCount(): Int = if(::model.isInitialized) model.files.size else 0
 
-    override fun getFile(index: Int): AbstractStorageFile = model.files.elementAt(index)
+    override fun getFile(index: Int): AbstractStorageFile = model.get(index)
 
     fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
-
             R.id.paste -> {
-                if(FilesClipboard.instance.isNotEmpty){
-                    when(FilesClipboard.instance.clipData!!.action){
+                if(filesClipboard.isNotEmpty){
+                    when(filesClipboard.clipData!!.action){
                         FilesClipboard.ClipData.Action.COPY -> {
-                            RxBus.publish(RxEvent.NewFilesTaskEvent(CopyTask(FilesClipboard.instance.clipData!!.files, model.source)))
+                            eventBus.publish(RxEvent.NewFilesTaskEvent(CopyTask(filesClipboard.clipData!!.files, model.folder)))
                         }
 
                         FilesClipboard.ClipData.Action.CUT -> {
-                            RxBus.publish(RxEvent.NewFilesTaskEvent(CutTask(FilesClipboard.instance.clipData!!.files, model.source)))
-                            FilesClipboard.instance.clear()
+                            eventBus.publish(RxEvent.NewFilesTaskEvent(CutTask(filesClipboard.clipData!!.files, model.folder)))
+                            filesClipboard.clear()
                         }
                     }
                 }
@@ -237,9 +242,10 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
             R.id.sortType -> view!!.showSortTypeDialog(model.sortFilesType)
 
             R.id.showHiddenFiles -> {
-                item.isChecked = !item.isChecked
-                (model as FilesNode).hiddenFilesAreShown = item.isChecked
-                saveBooleanToSharedPreferences(SHOW_HIDDEN_FILES_KEY, item.isChecked)
+                val includeHiddenFiles = !item.isChecked
+                item.isChecked = includeHiddenFiles
+                (model as? FilesNode)?.includeHiddenFiles = includeHiddenFiles
+                appPreferences.saveBoolean(SHOW_HIDDEN_FILES_KEY, includeHiddenFiles)
             }
             else -> return false
         }
@@ -248,8 +254,9 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
 
     fun onPrepareOptionsMenu(menu: Menu){
         val pasteMenuItem = menu.findItem(R.id.paste)
-        pasteMenuItem!!.isEnabled = FilesClipboard.instance.isNotEmpty
-        menu.findItem(R.id.showHiddenFiles)?.isChecked = getBooleanFromSharedPreferences(SHOW_HIDDEN_FILES_KEY)
+        pasteMenuItem!!.isEnabled = filesClipboard.isNotEmpty
+        val showHiddenFilesMenuItem = menu.findItem(R.id.showHiddenFiles)
+        showHiddenFilesMenuItem!!.isChecked = appPreferences.getBoolean(SHOW_HIDDEN_FILES_KEY)
     }
 
     private fun changeModel(node: AbstractFilesNode){
@@ -259,7 +266,7 @@ class FilesPresenter : AbstractFilesPresenter<AbstractFilesNode, FilesView>(),
         }
         else{
             if(node is FilesNode &&  model is FilesNode){
-                node.hiddenFilesAreShown = (model as FilesNode).hiddenFilesAreShown
+                node.includeHiddenFiles = (model as FilesNode).includeHiddenFiles
             }
             node.sortFilesType = model.sortFilesType
             node.isDescendingSort = model.isDescendingSort

@@ -12,7 +12,7 @@ import com.progressifff.filemanager.Constants.SORT_TYPE_KEY
 import com.progressifff.filemanager.R
 import com.progressifff.filemanager.RxBus
 import com.progressifff.filemanager.RxEvent
-import com.progressifff.filemanager.models.AbstractFilesNode
+import com.progressifff.filemanager.AbstractFilesNode
 
 class SortTypeDialog : BottomSheetDialogFragment(), View.OnClickListener {
 

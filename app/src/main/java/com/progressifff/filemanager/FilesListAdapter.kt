@@ -10,11 +10,10 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import com.progressifff.filemanager.presenters.AbstractFilesPresenter
-import com.progressifff.filemanager.views.BaseFilesView
+import com.progressifff.filemanager.views.FilesView
 import com.progressifff.filemanager.views.FilesListEntryView
 
-class FilesListAdapter<ModelT, FileViewT : BaseFilesView>(private val filesPresenter: AbstractFilesPresenter<ModelT, FileViewT>) :
+class FilesListAdapter<ModelT, FileViewT : FilesView>(private val filesPresenter: AbstractFilesPresenter<ModelT, FileViewT>) :
         RecyclerView.Adapter<FilesListAdapter<ModelT, FileViewT>.ViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
@@ -48,6 +47,28 @@ class FilesListAdapter<ModelT, FileViewT : BaseFilesView>(private val filesPrese
             filesListEntryView
         }
 
+        private val fileNameView: TextView = fileListEntryLayout.findViewById(R.id.storageFileName)
+        private val fileMoreBtn: ImageButton = fileListEntryLayout.findViewById(R.id.fileMoreBtn)
+        private val fileModificationDate: TextView? = fileListEntryLayout.findViewById(R.id.fileModificationTime)
+        private val fileImage: ImageView = fileListEntryLayout.findViewById(R.id.fileImage)
+
+        init {
+            fileListEntryLayout.setOnClickListener{
+                val filesListState = if(recyclerView.layoutManager is LinearLayoutManager){
+                    (recyclerView.layoutManager as LinearLayoutManager).onSaveInstanceState()!!
+                }
+                else{
+                    (recyclerView.layoutManager as GridLayoutManager).onSaveInstanceState()!!
+                }
+                filesPresenter.onFilesListEntryClicked(adapterPosition, filesListState)
+            }
+            fileListEntryLayout.setOnLongClickListener{
+                filesPresenter.onFileListItemLongClick(adapterPosition)
+                return@setOnLongClickListener true
+            }
+            fileMoreBtn.setOnClickListener { filesPresenter.onFileListEntryMenuClicked(adapterPosition) }
+        }
+
         override fun getImageView(): ImageView {
             return fileImage
         }
@@ -65,27 +86,8 @@ class FilesListAdapter<ModelT, FileViewT : BaseFilesView>(private val filesPrese
         }
 
         override fun setModificationDate(date: String) {
-            val text = "${getStringFromRes(R.string.file_modified)} $date"
+            val text = "${itemView.context.getString(R.string.file_modified)} $date"
             fileModificationDate?.text = text
-        }
-
-        private val fileNameView: TextView = fileListEntryLayout.findViewById(R.id.storageFileName)
-        private val fileMoreBtn: ImageButton = fileListEntryLayout.findViewById(R.id.fileMoreBtn)
-        private val fileModificationDate: TextView? = fileListEntryLayout.findViewById(R.id.fileModificationTime)
-        private val fileImage: ImageView = fileListEntryLayout.findViewById(R.id.fileImage)
-
-        init {
-            fileListEntryLayout.setOnClickListener{
-                val filesListState = if(recyclerView.layoutManager is LinearLayoutManager){
-                    (recyclerView.layoutManager as LinearLayoutManager).onSaveInstanceState()!!
-                }
-                else{
-                    (recyclerView.layoutManager as GridLayoutManager).onSaveInstanceState()!!
-                }
-                filesPresenter.onFileListEntryClicked(adapterPosition, filesListState)
-            }
-            fileListEntryLayout.setOnLongClickListener{return@setOnLongClickListener filesPresenter.onFileListItemLongClick(adapterPosition)}
-            fileMoreBtn.setOnClickListener { filesPresenter.onFileListEntryMenuClicked(adapterPosition) }
         }
     }
 }

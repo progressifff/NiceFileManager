@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import com.progressifff.filemanager.R
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.RxBus
 import com.progressifff.filemanager.RxEvent
 import io.reactivex.disposables.Disposable

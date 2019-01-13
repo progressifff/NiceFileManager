@@ -9,11 +9,12 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import com.progressifff.filemanager.dialogs.PasteExistingFilesDialog
 import com.progressifff.filemanager.presenters.FilesTasksPresenter
-import com.progressifff.filemanager.views.IFilesTasksView
+import com.progressifff.filemanager.views.FilesTasksView
 
-class FilesTaskView(@IdRes val viewId: Int) : IFilesTasksView{
+class FilesTasks(@IdRes val viewId: Int) : FilesTasksView{
     private lateinit var presenter: FilesTasksPresenter
     private lateinit var filesTasksTitle: TextView
     private lateinit var filesTasksViewBehavior: BottomSheetBehavior<*>
@@ -31,7 +32,7 @@ class FilesTaskView(@IdRes val viewId: Int) : IFilesTasksView{
         }
         else
             try{
-                PresenterManager.instance.restorePresenter<FilesTasksPresenter>(savedInstanceState, PRESENTER_KEY)
+                PresenterManager.restorePresenter<FilesTasksPresenter>(savedInstanceState, PRESENTER_KEY)
             } catch (e: Exception){
                 e.printStackTrace()
                 FilesTasksPresenter()
@@ -76,7 +77,7 @@ class FilesTaskView(@IdRes val viewId: Int) : IFilesTasksView{
     }
 
     fun onSaveInstance(outState: Bundle){
-        PresenterManager.instance.savePresenter(presenter, outState, PRESENTER_KEY)
+        PresenterManager.savePresenter(presenter, outState, PRESENTER_KEY)
     }
 
     fun release(){
@@ -134,13 +135,17 @@ class FilesTaskView(@IdRes val viewId: Int) : IFilesTasksView{
         }
     }
 
+    override fun showToast(messageId: Int) {
+        Toast.makeText(activity, activity.getString(messageId), Toast.LENGTH_SHORT).show()
+    }
+
     private fun updateFilesTasksTitle(){
         val tasksCount = presenter.tasksCount
-        val title = if(tasksCount > 1) "$tasksCount ${getStringFromRes(R.string.tasks)}" else "$tasksCount ${getStringFromRes(R.string.task)}"
+        val title = if(tasksCount > 1) "$tasksCount ${activity.getString(R.string.tasks)}" else "$tasksCount ${activity.getString(R.string.task)}"
         filesTasksTitle.text = title
     }
 
     companion object {
-        private val PRESENTER_KEY = FilesTaskView::class.java.name + "PresenterId"
+        private val PRESENTER_KEY = FilesTasks::class.java.name + "PresenterId"
     }
 }

@@ -1,7 +1,6 @@
 package com.progressifff.filemanager
 
 object Constants {
-
     const val FILES_DISPLAY_MODE_KEY = "FilesDisplayMode"
     const val FILES_ORDER_MODE_KEY = "FilesOrderMode"
     const val SHOW_HIDDEN_FILES_KEY = "ShowHiddenFiles"

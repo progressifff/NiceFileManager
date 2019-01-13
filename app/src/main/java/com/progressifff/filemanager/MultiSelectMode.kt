@@ -3,11 +3,9 @@ package com.progressifff.filemanager
 import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
-import com.progressifff.filemanager.models.AbstractStorageFile
-import com.progressifff.filemanager.presenters.AbstractFilesPresenter
 import java.lang.ref.WeakReference
 
-class MultiSelectMode(private val filesPresenter: AbstractFilesPresenter<*, *>) : ActionMode.Callback {
+class MultiSelectMode(var eventsListener: EventsListener? = null) : ActionMode.Callback {
 
     var action = WeakReference<ActionMode>(null)
     val selectedFiles = arrayListOf<AbstractStorageFile>()
@@ -63,7 +61,7 @@ class MultiSelectMode(private val filesPresenter: AbstractFilesPresenter<*, *>) 
     }
 
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-        filesPresenter.onSelectedFilesActionClicked(item!!)
+        eventsListener?.onMenuActionClicked(item!!)
         return true
     }
 
@@ -87,7 +85,12 @@ class MultiSelectMode(private val filesPresenter: AbstractFilesPresenter<*, *>) 
         if(!hidden && !isStateSaved) {
             running = false
             selectedFiles.clear()
-            filesPresenter.onActionModeDestroyed()
+            eventsListener?.onActionModeDestroyed()
         }
+    }
+
+    interface EventsListener {
+        fun onActionModeDestroyed()
+        fun onMenuActionClicked(menuItem: MenuItem)
     }
 }

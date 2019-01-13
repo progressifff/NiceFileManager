@@ -3,18 +3,24 @@ package com.progressifff.filemanager.presenters
 import android.os.Parcelable
 import android.support.annotation.NonNull
 import com.progressifff.filemanager.*
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.views.SearchedFilesView
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 
-class SearchedFilesPresenter(var rootFolder: AbstractStorageFile) : AbstractFilesPresenter<ArrayList<AbstractStorageFile>, SearchedFilesView>() {
+class SearchedFilesPresenter(private var rootFolder: AbstractStorageFile,
+                             eventBus: RxBus,
+                             filesClipboard: FilesClipboard,
+                             fileImageLoader: FileImageLoader) : AbstractFilesPresenter<ArrayList<AbstractStorageFile>, SearchedFilesView>( eventBus,
+                                                                                                                                            filesClipboard,
+                                                                                                                                            fileImageLoader) {
 
     private var fileDeleteEventListenerDisposable: Disposable? = null
     private var fileRenamedEventListenerDisposable: Disposable? = null
-    override val multiSelectMode = MultiSelectMode(this)
+    private var searchDisposable: Disposable? = null
     override var model = arrayListOf<AbstractStorageFile>()
-    private lateinit var searchDisposable: Disposable
+
+    init { multiSelectMode.eventsListener = this }
 
     override fun getFiles(): ArrayList<AbstractStorageFile> = model
 
@@ -22,22 +28,15 @@ class SearchedFilesPresenter(var rootFolder: AbstractStorageFile) : AbstractFile
 
     override fun getFile(index: Int): AbstractStorageFile = model[index]
 
-    override fun onFileListEntryClicked(index: Int, filesListState: Parcelable) {
-
+    override fun onFilesListEntryClicked(index: Int, filesListState: Parcelable) {
         try{
             val file = model[index]
-
             if(!multiSelectMode.running){
                 if(file.isDirectory){
-                    view!!.postResult(file)
+                    view!!.openFolder(file)
                 }
                 else {
-                    try{
-                        file.openAsFile()
-                    }
-                    catch (e: Exception){
-                        showToast(App.get().getString(R.string.open_file_error))
-                    }
+                    view!!.showOpenFileDialog(file)
                 }
             }
             else{
@@ -54,15 +53,15 @@ class SearchedFilesPresenter(var rootFolder: AbstractStorageFile) : AbstractFile
         view!!.showFileActionsDialog(getFile(index))
     }
 
-    override fun updateView() {
-        view?.update(true, false)
-    }
-
     override fun bindView(@NonNull v: SearchedFilesView){
         super.bindView(v)
-        updateView()
 
-        fileDeleteEventListenerDisposable = RxBus.listen(RxEvent.FileDeletedEvent::class.java).subscribe{ event ->
+        //If search performed
+        if(searchDisposable != null){
+            view?.update()
+        }
+
+        fileDeleteEventListenerDisposable = eventBus.listen(RxEvent.FileDeletedEvent::class.java).subscribe{ event ->
             val fileIndex = model.indexOf(event.file)
             if(fileIndex >= 0){
                 model.removeAt(fileIndex)
@@ -70,7 +69,7 @@ class SearchedFilesPresenter(var rootFolder: AbstractStorageFile) : AbstractFile
             }
         }
 
-        fileRenamedEventListenerDisposable = RxBus.listen(RxEvent.FileRenamedEvent::class.java).subscribe{ event ->
+        fileRenamedEventListenerDisposable = eventBus.listen(RxEvent.FileRenamedEvent::class.java).subscribe{ event ->
             val fileIndex = model.indexOf(event.file)
             if(fileIndex >= 0){
                 view?.updateFilesListEntry(fileIndex)
@@ -84,31 +83,17 @@ class SearchedFilesPresenter(var rootFolder: AbstractStorageFile) : AbstractFile
         fileRenamedEventListenerDisposable?.dispose()
     }
 
-    override fun deleteFiles(files: ArrayList<AbstractStorageFile>) {
-        val taskFiles = ArrayList(files)
-        RxBus.publish(RxEvent.DeleteFilesEvent {
-            multiSelectMode.cancel()
-            val deleteTask = DeleteTask(taskFiles)
-            RxBus.publish(RxEvent.NewFilesTaskEvent(deleteTask))
-        })
-        view!!.showDeleteFilesDialog(filesCount = files.size)
-    }
-
     fun searchFiles(query: String) {
-        if(::searchDisposable.isInitialized && searchDisposable.isDisposed){
-            searchDisposable.dispose()
+        if(searchDisposable != null && searchDisposable!!.isDisposed){
+            searchDisposable!!.dispose()
         }
-        view!!.showFilesList()
         model.clear()
-        view!!.resetFilesList()
-
+        view!!.updateFilesList()
         view!!.showProgressBar()
-
-        val filesSource = rootFolder.search(query)
-        searchDisposable = filesSource.subscribeWith(object : DisposableObserver<AbstractStorageFile>(){
+        searchDisposable = rootFolder.search(query).subscribeWith(object : DisposableObserver<AbstractStorageFile>(){
             override fun onComplete() {
                 view?.hideProgressBar()
-                updateView()
+                view?.update()
             }
 
             override fun onNext(file: AbstractStorageFile) {
@@ -119,8 +104,9 @@ class SearchedFilesPresenter(var rootFolder: AbstractStorageFile) : AbstractFile
             override fun onError(e: Throwable) {
                 e.printStackTrace()
                 model.clear()
-                showToast("An error occurs searching in ${rootFolder.name}")
-                updateView()
+                view!!.showToast(R.string.searching_files_error)
+                view?.hideProgressBar()
+                view?.update()
             }
         })
     }

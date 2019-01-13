@@ -1,10 +1,7 @@
 package com.progressifff.filemanager.models
 
-import android.content.Intent
 import android.os.Parcel
 import android.os.Parcelable
-import android.support.v4.content.FileProvider
-import android.util.Log
 import android.webkit.MimeTypeMap
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -17,43 +14,46 @@ import io.reactivex.Observable
 import io.reactivex.Completable
 import android.support.annotation.RequiresApi
 import com.progressifff.filemanager.*
+import java.lang.AssertionError
 import java.nio.file.Files
 import java.nio.file.attribute.BasicFileAttributes
 import java.text.DateFormat
 
-class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
+class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
+    var source = source
+        private set
     private val resettableLazyManager = ResettableLazyManager()
-    override val name: String get() {return file.name}
-    override val path: String get() {return file.absolutePath}
-    override val exists: Boolean get() {return file.exists()}
-    override val notExists: Boolean get() {return !file.exists()}
-    override val isHidden: Boolean get() {return file.isHidden}
-    override val isDirectory: Boolean get() {return file.isDirectory}
-    override val lastModified: Long get() {return file.lastModified()}
-    override val canRead: Boolean get() {return file.canRead()}
-    override val canWriter: Boolean get() {return file.canWrite()}
+    override val name: String get() {return source.name}
+    override val path: String get() {return source.absolutePath}
+    override val exists: Boolean get() {return source.exists()}
+    override val notExists: Boolean get() {return !source.exists()}
+    override val isHidden: Boolean get() {return source.isHidden}
+    override val isDirectory: Boolean get() {return source.isDirectory}
+    override val lastModified: Long get() {return source.lastModified()}
+    override val canRead: Boolean get() {return source.canRead()}
+    override val canWrite: Boolean get() {return source.canWrite()}
     override val size: Long by resettableLazy(resettableLazyManager) {
-        if(file.isDirectory){
-            val folderSize = calculateDirSize(file.path)
+        if(source.isDirectory){
+            val folderSize = calculateDirSize(source.path)
             if(folderSize < 0){
                 throw Exception("Failed to calculate directory size")
             }
             return@resettableLazy folderSize
         }
 
-        return@resettableLazy file.length()
+        return@resettableLazy source.length()
     }
 
     override val lastModifiedDateTime: String by resettableLazy(resettableLazyManager) {
-        val lastModified = file.lastModified()
+        val lastModified = source.lastModified()
         val dateStyle = DateFormat.MEDIUM
         val timeStyle = DateFormat.SHORT
         val df = DateFormat.getDateTimeInstance(dateStyle, timeStyle, Locale.getDefault())
         return@resettableLazy df.format(Date(lastModified))
     }
 
-    override val extension: String get() {return file.extension}
-    override val parent: AbstractStorageFile? get()  {return StorageFile(file.parentFile) }
+    override val extension: String get() {return source.extension}
+    override val parent: AbstractStorageFile? get()  {return StorageFile(source.parentFile) }
     override val mimeType: String get() {
         val mimeTypeMap = MimeTypeMap.getSingleton()
         return try{
@@ -68,9 +68,9 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
         }
     }
 
-    constructor(fileName: String): this(File(fileName))
+    constructor(filePath: String): this(File(filePath))
 
-    constructor(parent: StorageFile, fileName: String): this(parent.file, fileName)
+    constructor(parent: StorageFile, fileName: String): this(parent.source, fileName)
 
     constructor(parent: File, fileName: String): this(File(parent, fileName))
 
@@ -79,7 +79,7 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
     constructor(parcel: Parcel) : this(parcel.readSerializable() as File)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeSerializable(file)
+        parcel.writeSerializable(source)
     }
 
     override fun describeContents(): Int {
@@ -94,70 +94,55 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
         override fun newArray(size: Int): Array<StorageFile?> {
             return arrayOfNulls(size)
         }
-
-        init {
-            System.loadLibrary("native-lib")
-        }
     }
 
     private external fun calculateDirSize(dirPath: String): Long
 
     override fun rename(name: String) {
-        val filePath = file.absolutePath.substring(0, file.absolutePath.lastIndexOf(File.separator) + 1) // + 1 for current slash
-        val newFileName = filePath + name
-        val newFile = File(newFileName)
+        val filePath = source.absolutePath.substring(0, source.absolutePath.lastIndexOf(File.separator) + 1) // + 1 for current slash
+        val newFilePath = filePath + name
+        val newFile = File(newFilePath)
         rename(newFile, true)
     }
 
     private fun rename(newFile: File, forceRename: Boolean = false){
         if(newFile.exists()){
             if(!forceRename){
-                throw FileAlreadyExistsException(file, newFile, "The file with the same name is already exists.")
+                throw FileAlreadyExistsException(source, newFile, "File with the same name is already exists.")
             }
             else  {
                 newFile.deleteRecursively()
             }
         }
-        val isRenamed = file.renameTo(newFile)
+        val isRenamed = source.renameTo(newFile)
         if(!isRenamed){
-            throw FileSystemException(file, newFile, "Failed to rename file.")
+            throw FileSystemException(source, newFile, "Failed to rename source.")
         }
-        file = newFile
-    }
-
-    override fun copyRecursively(destPath: String, existingFileAction: ExistingFileAction){
-        when(existingFileAction){
-            ExistingFileAction.REWRITE -> file.copyRecursively(File(destPath, file.name), true)
-            ExistingFileAction.SAVE_BOTH -> {
-                val destFile = getUniqueFile(File(destPath, file.name))
-                file.copyRecursively(destFile)
-            }
-            else -> { }
-        }
+        source = newFile
     }
 
     override fun copyRecursivelyAsync(dest: String,
-                                      onProgressChanged: (bytesCopied: Long) -> Unit, // from 0 to 100
-                                      onProcessNewFile: (file: AbstractStorageFile) -> Unit,
-                                      onError: (file: AbstractStorageFile, e: Exception) -> OnErrorAction,
+                                      onProgressChanged: ((bytesCopied: Long) -> Unit)?, // from 0 to 100
+                                      onProcessNewFile: ((file: AbstractStorageFile) -> Unit)?,
+                                      onError: ((file: AbstractStorageFile, messageId: Int) -> OnErrorAction)?,
                                       existingFileAction: ExistingFileAction): Completable {
 
         var destPath = dest
 
-        var filesRelativePathBase = file.parent
+        var filesRelativePathBase = source.parent
 
         return Completable.create {singleEmitter ->
 
             when {
-                this.notExists -> onError(this, NoSuchFieldException("The source file doesn't exist."))
-                (file.path == StorageFile(destPath).path) -> onError(StorageFile(destPath), IOException("The destination folder is a subfolder of the source folder."))
+                this.notExists -> onError?.invoke(this, R.string.file_not_exist)
+                (source.path == StorageFile(destPath).path) -> onError?.invoke(StorageFile(destPath), R.string.destination_folder_is_subfolder_of_source)
                 else -> {
                     try {
 
                         var overallBytesCopied = 0L
 
                         //walk throw a directory
-                        file.walkTopDown().forEach { currentFile ->
+                        source.walkTopDown().forEach { currentFile ->
 
                             //If disposed -> cancel copying
                             if (singleEmitter.isDisposed) {
@@ -165,43 +150,40 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
                             }
 
                             if (!currentFile.exists()) {
-                                if (onError(StorageFile(currentFile),
-                                                NoSuchFileException(file = currentFile,
-                                                        reason = "The source file doesn't exist.")) == OnErrorAction.TERMINATE) {
+                                if (onError?.invoke(StorageFile(currentFile), R.string.copying_file_is_not_exist) == OnErrorAction.TERMINATE) {
                                     return@create
                                 }
 
                             } else {
-                                //Find dest file for current file
+                                //Find dest source for current source
                                 val relativePath = currentFile.toRelativeString(File(filesRelativePathBase))
                                 var destFile = File(destPath, relativePath)
 
-                                //Delete dest file if exists
+                                //Delete dest source if exists
                                 if (destFile.exists()) {
 
                                     when (existingFileAction) {
                                         ExistingFileAction.REWRITE -> {
                                             when {
                                                 destFile.isDirectory -> destFile.deleteRecursively()
-                                                destFile.path == file.path -> return@forEach
+                                                destFile.path == source.path -> return@forEach
                                                 else -> destFile.delete()
                                             }
                                         }
 
                                         ExistingFileAction.SAVE_BOTH -> {
                                             destFile = getUniqueFile(destFile)
-                                            destPath +=  ("/" + destFile.name)
-                                            filesRelativePathBase = file.path
-                                            Log.v("AAA", destPath)
+                                            destPath +=  (File.separator + destFile.name)
+                                            filesRelativePathBase = source.path
                                         }
 
                                         ExistingFileAction.SKIP -> return@forEach
                                     }
                                 }
 
-                                onProcessNewFile(StorageFile(currentFile))
+                                onProcessNewFile?.invoke(StorageFile(currentFile))
 
-                                //Create filesNode or copy file bytes
+                                //Create filesNode or copy source bytes
                                 if (currentFile.isDirectory) {
                                     destFile.mkdirs()
 
@@ -217,7 +199,7 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
                                                     val current = System.currentTimeMillis()
                                                     if((current - start) > 100) {
                                                         start = current
-                                                        onProgressChanged(overallBytesCopied + bytesCopied)
+                                                        onProgressChanged?.invoke(overallBytesCopied + bytesCopied)
                                                     }
                                                 }
                                             }) {
@@ -261,26 +243,26 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
         return resultFile
     }
 
-    override fun deleteRecursivelyAsync(onProgressChanged: (bytesProcessed: Long) -> Unit, //from 0.0 - 1.0
-                                        onProcessNewFile: (file: AbstractStorageFile) -> Unit): Completable {
+    override fun deleteRecursivelyAsync(onProgressChanged: ((bytesProcessed: Long) -> Unit)?, //from 0.0 - 1.0
+                                        onProcessNewFile: ((file: AbstractStorageFile) -> Unit)?): Completable {
 
         return Completable.create { completableEmitter ->
             try{
                 var overallBytes = 0L
                 //walk throw a directory
-                file.walkBottomUp().forEach {currentFile ->
+                source.walkBottomUp().forEach { currentFile ->
 
                     //If disposed -> cancel copying
                     if(completableEmitter.isDisposed){
                         return@create
                     }
 
-                    onProcessNewFile(StorageFile(currentFile))
+                    onProcessNewFile?.invoke(StorageFile(currentFile))
 
                     if(currentFile.exists()){
                         overallBytes += currentFile.length()
                         currentFile.delete()
-                        onProgressChanged(overallBytes)
+                        onProgressChanged?.invoke(overallBytes)
                     }
                 }
                 completableEmitter.onComplete()
@@ -293,10 +275,10 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
         .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun move(path: String, existingFileAction: ExistingFileAction){
-        var destFile = File(path + File.separator + file.name)
-        if(destFile.exists()){
-            when(existingFileAction){
+    override fun move(path: String, existingFileAction: ExistingFileAction) {
+        var destFile = File(path + File.separator + source.name)
+        if (destFile.exists()) {
+            when (existingFileAction) {
                 ExistingFileAction.REWRITE -> rename(destFile, true)
 
                 ExistingFileAction.SAVE_BOTH -> {
@@ -309,46 +291,17 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
         rename(destFile)
     }
 
-    override fun share() {
-        assert(!isDirectory)
-
-        val sendIntent: Intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(App.get(), BuildConfig.APPLICATION_ID, file))
-            type = mimeType
-        }
-        App.get().startActivity(Intent.createChooser(sendIntent, App.get().getString(R.string.share_dialog_title)))
-    }
-
-    override fun openAsFile() {
-        assert(!file.isDirectory)
-
-        val mimeType = this.mimeType
-        val apkMimeType = "application/vnd.android.package-archive"
-        val intentAction = if(mimeType == apkMimeType) Intent.ACTION_INSTALL_PACKAGE else Intent.ACTION_VIEW
-        val fileIntent = Intent(intentAction)
-        fileIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
-        val uri = FileProvider.getUriForFile(App.get(), BuildConfig.APPLICATION_ID, file)
-        fileIntent.setDataAndType(uri, mimeType)
-        //Check if there is an application for this intent
-        val packageManager = App.get().packageManager
-        if (fileIntent.resolveActivity(packageManager) != null) {
-            App.get().startActivity(fileIntent)
-        }
-        else{
-            throw UnsupportedOperationException("There isn`t an application for opening this file")
-        }
-    }
-
     override fun openAsDir(): Single<ArrayList<AbstractStorageFile>> {
-        assert(file.isDirectory)
+        if(!source.isDirectory){
+            throw AssertionError("File is not a directory")
+        }
 
         return Single.create<ArrayList<AbstractStorageFile>> {
             try{
-                if(!file.isDirectory){
+                if(!source.isDirectory){
                     throw UnsupportedOperationException("File is not a directory.")
                 }
-                val files = file.listFiles() ?: throw IOException("An I/O error occurs.")
+                val files = source.listFiles() ?: throw IOException("An I/O error occurs.")
                 val result = ArrayList<AbstractStorageFile>()
                 for (entry in files) {
                     if(it.isDisposed) return@create
@@ -372,7 +325,7 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
     override fun search(fileName: String): Observable<AbstractStorageFile>{
         return Observable.create<AbstractStorageFile>{ it ->
             try{
-                file.walkTopDown().forEach {currentFile ->
+                source.walkTopDown().forEach { currentFile ->
                     if(currentFile.name.contains(fileName, true)){
                         it.onNext(StorageFile(currentFile))
                     }
@@ -388,29 +341,29 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
     }
 
     override fun createNew(){
-        val createFileResult = file.createNewFile()
+        val createFileResult = source.createNewFile()
         if(!createFileResult){
-            throw FileAlreadyExistsException(file, null, "Failed to create new file, because the another one with the same name is already exists.")
+            throw FileAlreadyExistsException(source, null, "Failed to create new source, because the another one with the same name is already exists.")
         }
     }
 
     override fun createFolder(){
-        val createDirResult = file.mkdir()
+        val createDirResult = source.mkdir()
         if(!createDirResult){
-            throw FileAlreadyExistsException(file, null, "Failed to create new directory, because the another one with the same name is already exists.")
+            throw FileAlreadyExistsException(source, null, "Failed to create new directory, because the another one with the same name is already exists.")
         }
     }
 
     override fun contains(fileName: String): Boolean {
-        if(!file.isDirectory){
-            throw Exception("File should be a directory")
+        if(!source.isDirectory){
+            throw Exception("File is not a directory")
         }
-        return File(this.file, fileName).exists()
+        return File(this.source, fileName).exists()
     }
 
     @RequiresApi(26)
     override fun creationDateTime(): String{
-        val attributes = Files.readAttributes(file.toPath(), BasicFileAttributes::class.java)
+        val attributes = Files.readAttributes(source.toPath(), BasicFileAttributes::class.java)
         val fileCreationTime = attributes.creationTime()
         val dateStyle = DateFormat.MEDIUM
         val timeStyle = DateFormat.SHORT
@@ -418,18 +371,11 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
         return df.format(Date(fileCreationTime.toMillis()))
     }
 
-    override fun hasChild(fileName: String): Boolean {
-        if(!file.isDirectory){
-            throw Exception("File is not a directory")
-        }
-        return File(file, fileName).exists()
-    }
-
     override fun get(fileName: String): AbstractStorageFile {
-        if(!file.isDirectory){
+        if(!source.isDirectory){
             throw Exception("File is not a directory")
         }
-        return StorageFile(File(file, fileName))
+        return StorageFile(File(source, fileName))
     }
 
     fun notifyModified(){
@@ -439,11 +385,11 @@ class StorageFile(var file: File) : AbstractStorageFile(), Parcelable{
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        if (file != (other as StorageFile).file) return false
+        if (source != (other as StorageFile).source) return false
         return true
     }
 
     override fun hashCode(): Int {
-        return file.hashCode()
+        return source.hashCode()
     }
 }

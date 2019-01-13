@@ -2,6 +2,7 @@ package com.progressifff.filemanager
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.support.annotation.StringRes
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
@@ -15,16 +16,14 @@ import android.view.*
 import android.view.animation.AnimationUtils
 import android.widget.ProgressBar
 import com.progressifff.filemanager.dialogs.*
-import com.progressifff.filemanager.models.AbstractFilesNode
-import com.progressifff.filemanager.models.AbstractStorageFile
 import com.progressifff.filemanager.presenters.MainPresenter
 import android.util.TypedValue
 import java.lang.Exception
 import android.widget.LinearLayout
-import com.progressifff.filemanager.views.FilesView
+import android.widget.Toast
+import com.progressifff.filemanager.views.NestedFilesView
 
-class FilesFragment : Fragment(), FilesView {
-
+class FilesFragment : Fragment(), NestedFilesView {
     private lateinit var noFilesMessage: LinearLayout
     private lateinit var filesList: RecyclerView
     private lateinit var filesListAdapter: RecyclerView.Adapter<*>
@@ -37,16 +36,15 @@ class FilesFragment : Fragment(), FilesView {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         setHasOptionsMenu(true)
-
         presenter = if(savedInstanceState == null){
-            FilesPresenter()
+            FilesPresenter(AppPreferences, RxBus, FilesClipboard, FileImageManager)
         }
         else try{
-            PresenterManager.instance.restorePresenter<FilesPresenter>(savedInstanceState)
+            PresenterManager.restorePresenter<FilesPresenter>(savedInstanceState)
         }
         catch (e: Exception){
             e.printStackTrace()
-            FilesPresenter()
+            FilesPresenter(AppPreferences, RxBus, FilesClipboard, FileImageManager)
         }
 
         activity!!.findViewById<FloatingActionButton>(R.id.addFolderFab).setOnClickListener(presenter.onViewClickListener)
@@ -70,7 +68,7 @@ class FilesFragment : Fragment(), FilesView {
         filesList = root.findViewById(R.id.filesList)
         filesListAdapter = FilesListAdapter(presenter)
         filesListLinearLayoutManager = LinearLayoutManager(context)
-        filesListGridLayoutManager = GridLayoutManager(context, calculateGridColumnsCount())
+        filesListGridLayoutManager = GridLayoutManager(context, Utils.calculateGridColumnsCount())
         filesListGridLayoutDecoration = RecyclerViewGridLayoutDecoration()
 
         filesList.apply{
@@ -86,7 +84,7 @@ class FilesFragment : Fragment(), FilesView {
         })
 
         if(savedInstanceState != null){
-            val filesDisplayMode = MainPresenter.FilesDisplayMode.fromString(getStringFromSharedPreferences(Constants.FILES_DISPLAY_MODE_KEY, MainPresenter.FilesDisplayMode.LIST.name))
+            val filesDisplayMode = MainPresenter.FilesDisplayMode.fromString(AppPreferences.getString(Constants.FILES_DISPLAY_MODE_KEY, MainPresenter.FilesDisplayMode.LIST.name))
             when(filesDisplayMode){
                 MainPresenter.FilesDisplayMode.LIST -> filesList.layoutManager = filesListLinearLayoutManager
                 MainPresenter.FilesDisplayMode.GRID -> {
@@ -122,12 +120,11 @@ class FilesFragment : Fragment(), FilesView {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        PresenterManager.instance.savePresenter(presenter, outState)
+        PresenterManager.savePresenter(presenter, outState)
     }
 
     override fun showDeleteFilesDialog(filesCount: Int) {
-        val dialog = DeleteFilesDialog.createInstance(filesCount)
-        dialog.show(childFragmentManager, DeleteFilesDialog::class.java.name)
+        DeleteFilesDialog.createInstance(filesCount).show(childFragmentManager, DeleteFilesDialog::class.java.name)
     }
 
     override fun setFilesInListLayout() {
@@ -145,7 +142,7 @@ class FilesFragment : Fragment(), FilesView {
     override fun setFilesInGridLayout() {
         val firstVisibleItemPosition = (filesList.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
 
-        filesListGridLayoutManager.spanCount = calculateGridColumnsCount()
+        filesListGridLayoutManager.spanCount = Utils.calculateGridColumnsCount()
         filesList.layoutManager = filesListGridLayoutManager
 
         filesList.adapter = filesListAdapter
@@ -198,7 +195,6 @@ class FilesFragment : Fragment(), FilesView {
     }
 
     override fun update(animate: Boolean, resetListScrollPosition: Boolean) {
-
         if(resetListScrollPosition){
             filesList.scrollToPosition(0)
         }
@@ -217,25 +213,23 @@ class FilesFragment : Fragment(), FilesView {
 
         filesListAdapter.notifyDataSetChanged()
 
-        filesList.runOnLayoutChanged { setupToolBarScrollingBehavior(filesList.isScrollable) }
+        filesList.runOnLayoutChanged { setupToolBarScrollingBehavior(!presenter.multiSelectMode.running && filesList.isScrollable) }
 
         if(filesListRefresher.isRefreshing){
             App.get().handler.postDelayed({ filesListRefresher.isRefreshing = false }, 100)
         }
-
     }
 
     override fun showFileDetailsDialog(file: AbstractStorageFile) {
         FileDetailsDialog.createInstance(file).show(childFragmentManager, FileDetailsDialog::class.java.name)
     }
 
-    override fun invalidateMenuOptions() {
+    override fun invalidateMenu() {
         activity?.invalidateOptionsMenu()
     }
 
     override fun showCreateFolderDialog(parentFolder: AbstractStorageFile) {
-        val createStorageFileDialog = CreateFolderDialog.createInstance(parentFolder)
-        createStorageFileDialog.show(childFragmentManager, RenameStorageFileDialog::class.java.name)
+        CreateFolderDialog.createInstance(parentFolder).show(childFragmentManager, RenameStorageFileDialog::class.java.name)
     }
 
     override fun startActionMode(multiSelectMode: MultiSelectMode) {
@@ -249,8 +243,7 @@ class FilesFragment : Fragment(), FilesView {
     }
 
     override fun showRenameFileDialog(file: AbstractStorageFile) {
-        val renameDialog = RenameStorageFileDialog.createInstance(file)
-        renameDialog.show(childFragmentManager, RenameStorageFileDialog::class.java.name)
+        RenameStorageFileDialog.createInstance(file).show(childFragmentManager, RenameStorageFileDialog::class.java.name)
     }
 
     override fun showFileActionsDialog(file: AbstractStorageFile) {
@@ -277,5 +270,17 @@ class FilesFragment : Fragment(), FilesView {
         else{
             filesList.runOnLayoutChanged { setupToolBarScrollingBehavior(filesList.isScrollable) }
         }
+    }
+
+    override fun showToast(@StringRes messageId: Int) {
+        Toast.makeText(context, getString(messageId), Toast.LENGTH_SHORT).show()
+    }
+
+    override fun showShareDialog(file: AbstractStorageFile) {
+        Utils.showShareFileDialog(context!!, file)
+    }
+
+    override fun showOpenFileDialog(file: AbstractStorageFile) {
+        Utils.showOpenFileDialog(context!!, file)
     }
 }

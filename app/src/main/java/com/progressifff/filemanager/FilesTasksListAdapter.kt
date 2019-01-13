@@ -38,10 +38,23 @@ class FilesTasksListAdapter(private val presenter: FilesTasksPresenter) : Recycl
             }
         }
 
-        override fun setTaskTitle(title: String){
-            if(fileTaskTitle.text != title) {
-                fileTaskTitle.text = title
+        override fun updateTitle(task: AbstractTask){
+            val context = itemView.context
+            val filesParent = task.files.first().parent!!
+
+            var titleToken = "${task.processingFilesCount} ${if(task.processingFilesCount == 1) context.getString(R.string.file) else context.getString(R.string.files)} "
+            titleToken += if(task is CopyCutTask) {
+                "${context.getString(R.string.from)} ${filesParent.name} ${context.getString(R.string.to)} ${task.destFolder.name}."
             }
+            else{
+                "${context.getString(R.string.in_prefix)} ${filesParent.name}."
+            }
+            val title = when (task) {
+                is CopyTask -> "${context.getString(R.string.copying_task)} $titleToken"
+                is CutTask -> "${context.getString(R.string.cut_task)} $titleToken"
+                else -> "${context.getString(R.string.deleting_task)} $titleToken"
+            }
+            fileTaskTitle.text = title
         }
 
         override fun setProcessedFileName(fileName: String){
@@ -51,7 +64,7 @@ class FilesTasksListAdapter(private val presenter: FilesTasksPresenter) : Recycl
         }
 
         override fun setFileTaskProgress(taskProgress: Int){
-            val progress = "$taskProgress% ${getStringFromRes(R.string.task_progress_complete)}"
+            val progress = "$taskProgress% ${itemView.context.getString(R.string.task_progress_complete)}"
             fileTaskProgress.text = progress
 
             if(fileTaskProgressBar.isIndeterminate){

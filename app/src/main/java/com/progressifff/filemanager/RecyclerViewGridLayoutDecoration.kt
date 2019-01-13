@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import java.lang.AssertionError
 
 class RecyclerViewGridLayoutDecoration : RecyclerView.ItemDecoration() {
 
@@ -12,7 +13,9 @@ class RecyclerViewGridLayoutDecoration : RecyclerView.ItemDecoration() {
         val fileCardWidth = App.get().resources.getDimensionPixelSize(R.dimen.file_card_width)
         val columnsCount = (parent.layoutManager as GridLayoutManager).spanCount
 
-        assert(columnsCount != 0)
+        if(columnsCount == 0) {
+            throw AssertionError("Null columns count")
+        }
 
         val columnWidth = parent.width / columnsCount
         val spacing = (columnWidth - fileCardWidth) / 2

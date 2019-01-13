@@ -1,6 +1,8 @@
 package com.progressifff.filemanager.views
 
-interface IFilesTasksView {
+import android.support.annotation.StringRes
+
+interface FilesTasksView {
     fun showCopyExistingFilesDialog(filesNames: ArrayList<String>)
     fun showFilesTasksView()
     fun hideFilesTaskView()
@@ -8,4 +10,5 @@ interface IFilesTasksView {
     fun removeFileTask(taskIndex: Int)
     fun updateFileTask(taskIndex: Int)
     fun update()
+    fun showToast(@StringRes messageId: Int)
 }

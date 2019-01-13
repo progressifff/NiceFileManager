@@ -3,8 +3,9 @@ package com.progressifff.filemanager.dialogs
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
+import android.widget.Toast
 import com.progressifff.filemanager.*
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.presenters.RenameStorageFileDialogPresenter
 import java.lang.Exception
 
@@ -19,14 +20,14 @@ class RenameStorageFileDialog : InputFileNameDialog() {
             RenameStorageFileDialogPresenter(file.name, file.parent!!)
         }
         else try{
-            PresenterManager.instance.restorePresenter<RenameStorageFileDialogPresenter>(savedInstanceState)
+            PresenterManager.restorePresenter<RenameStorageFileDialogPresenter>(savedInstanceState)
         }
         catch (e: Exception){
             e.printStackTrace()
             RenameStorageFileDialogPresenter(file.name, file.parent!!)
         }
 
-        return buildDialog(getStringFromRes(R.string.rename_dialog_title), file.isDirectory, file.name)
+        return buildDialog(context!!.getString(R.string.rename_dialog_title), file.isDirectory, file.name)
     }
 
     override fun onSuccess() {
@@ -36,7 +37,7 @@ class RenameStorageFileDialog : InputFileNameDialog() {
         }
         catch (e: Exception){
             e.printStackTrace()
-            showToast(getStringFromRes(R.string.rename_files_error))
+            Toast.makeText(context, context!!.getString(R.string.rename_file_error), Toast.LENGTH_SHORT).show()
         }
         dismiss()
     }

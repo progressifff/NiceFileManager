@@ -1,7 +1,9 @@
 package com.progressifff.filemanager.views
 
+import com.progressifff.filemanager.AbstractTask
+
 interface FileTaskView {
-    fun setTaskTitle(title: String)
+    fun updateTitle(task: AbstractTask)
     fun setProcessedFileName(fileName: String)
     fun setFileTaskProgress(taskProgress: Int)
 }

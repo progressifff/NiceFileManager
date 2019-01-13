@@ -19,42 +19,14 @@ import io.reactivex.schedulers.Schedulers
 import java.lang.ref.WeakReference
 import android.provider.MediaStore
 import android.widget.ImageView
-import com.progressifff.filemanager.models.AbstractStorageFile
 import java.lang.Exception
 import java.util.concurrent.Executors
 
-class FileDrawableLoader private constructor() : ComponentCallbacks2 {
+interface FileImageLoader {
+    fun applyFileImage(file: AbstractStorageFile, fileListEntryView: WeakReference<ImageView>)
+}
 
-    companion object {
-        private object Holder { val INSTANCE = FileDrawableLoader() }
-
-        private const val APK_MIME_TYPE = "application/vnd.android.package-archive"
-
-        val instance: FileDrawableLoader by lazy{
-            return@lazy Holder.INSTANCE
-        }
-
-        fun calculateBitmapSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-
-            val height = options.outHeight
-            val width = options.outWidth
-            var inSampleSize = 1
-
-            if (height > reqHeight || width > reqWidth) {
-
-                val halfHeight = height / 2
-                val halfWidth = width / 2
-
-                // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-                // height and width larger than the requested height and width.
-                while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                    inSampleSize *= 2
-                }
-            }
-            return inSampleSize
-        }
-    }
-
+object FileImageManager : FileImageLoader, ComponentCallbacks2 {
     private var cache: LruCache<AbstractStorageFile, Drawable>
     private val executor = Executors.newFixedThreadPool(2)!!
     private val pooledScheduler = Schedulers.from(executor)
@@ -66,67 +38,13 @@ class FileDrawableLoader private constructor() : ComponentCallbacks2 {
         cache = LruCache(cacheMaxSize)
     }
 
-    fun applyFileImage(file: AbstractStorageFile, fileListEntryView: WeakReference<ImageView>){
-
-        if(file.isDirectory){
-            fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_folder))
-        }
-        else {
-            val fileMimeType = file.mimeType
-
-            when {
-                fileMimeType.startsWith("audio") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_music_note))
-
-                fileMimeType == "text/plain" -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_txt))
-
-                fileMimeType == "application/pdf" -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_pdf))
-
-                (fileMimeType == "application/zip" || fileMimeType == "application/rar") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_zip_blue))
-
-                (fileMimeType == "application/msword" ||
-                        fileMimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_doc))
-
-                (fileMimeType == "application/vnd.ms-excel" ||
-                        fileMimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_xls))
-
-                (fileMimeType == "application/vnd.ms-powerpoint" ||
-                        fileMimeType == "application/vnd.openxmlformats-officedocument.presentationml.presentation") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_ppt))
-
-
-                else -> {
-                    val image = cache.get(file)
-                    if (image != null) {
-                        fileListEntryView.get()?.setImageDrawable(image)
-                    } else {
-                        fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_file))
-
-                        fileListEntryView.get()?.tag = file
-                        loadFileDynamicImage(file).subscribeWith(object : DisposableSingleObserver<Drawable>() {
-                            override fun onSuccess(image: Drawable) {
-                                cache.put(file, image)
-                                if (fileListEntryView.get()?.tag == file) {
-                                    fileListEntryView.get()?.setImageDrawable(image)
-                                }
-                            }
-
-                            override fun onError(e: Throwable) {
-                                e.printStackTrace()
-                            }
-                        })
-                    }
-                }
-            }
-        }
-    }
-
     private fun loadFileDynamicImage(file: AbstractStorageFile): Single<Drawable>{
-
         return Single.create<Drawable> {
             try {
                 val fileMimeType = file.mimeType
 
                 when {
-                    fileMimeType == APK_MIME_TYPE -> {
+                    fileMimeType == "application/vnd.android.package-archive" -> {
                         val packageManager = App.get().packageManager
                         val packageArchiveInfo = packageManager?.getPackageArchiveInfo(file.path, 0)
                         val applicationInfo = packageArchiveInfo?.applicationInfo
@@ -154,8 +72,75 @@ class FileDrawableLoader private constructor() : ComponentCallbacks2 {
             }
         }
 
-         .subscribeOn(pooledScheduler)
-         .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(pooledScheduler)
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    private fun calculateBitmapSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+        return inSampleSize
+    }
+
+    override fun applyFileImage(file: AbstractStorageFile, fileListEntryView: WeakReference<ImageView>){
+
+        if(file.isDirectory){
+            fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_folder))
+        }
+        else {
+            val fileMimeType = file.mimeType
+
+            when {
+                fileMimeType.startsWith("audio") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_music_note))
+
+                fileMimeType == "text/plain" -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_txt))
+
+                fileMimeType == "application/pdf" -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_pdf))
+
+                (fileMimeType == "application/zip" || fileMimeType == "application/rar") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_zip_blue))
+
+                (fileMimeType == "application/msword" ||
+                        fileMimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_doc))
+
+                (fileMimeType == "application/vnd.ms-excel" ||
+                        fileMimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_xls))
+
+                (fileMimeType == "application/vnd.ms-powerpoint" ||
+                        fileMimeType == "application/vnd.openxmlformats-officedocument.presentationml.presentation") -> fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_ppt))
+                else -> {
+                    val image = cache.get(file)
+                    if (image != null) {
+                        fileListEntryView.get()?.setImageDrawable(image)
+                    } else {
+                        fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_file))
+
+                        fileListEntryView.get()?.tag = file
+                        loadFileDynamicImage(file).subscribeWith(object : DisposableSingleObserver<Drawable>() {
+                            override fun onSuccess(image: Drawable) {
+                                cache.put(file, image)
+                                if (fileListEntryView.get()?.tag == file) {
+                                    fileListEntryView.get()?.setImageDrawable(image)
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                e.printStackTrace()
+                            }
+                        })
+                    }
+                }
+            }
+        }
     }
 
     override fun onLowMemory() {}

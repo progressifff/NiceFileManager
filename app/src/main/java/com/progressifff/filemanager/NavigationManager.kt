@@ -2,24 +2,21 @@ package com.progressifff.filemanager
 
 import android.os.Parcelable
 import android.support.annotation.IdRes
-import com.progressifff.filemanager.models.AbstractFilesNode
+import android.support.annotation.StringRes
+import com.progressifff.filemanager.AbstractFilesNode
 import java.util.*
 
 class NavigationManager {
     private var navigationEntries = mutableListOf<NavigationEntry>()
-
     private var navigationStack = Stack<NavigationStackEntry>()
-
     private var statesStack = Stack<NavigationManagerState>()
-
-    @IdRes  var currentDrawerMenuItemId: Int = 0
-            var currentToolBarTitle = ""
-
+    @IdRes var currentDrawerMenuItemId: Int = 0
+    @StringRes var currentToolBarTitle: Int = 0
     val navigationEntriesCount: Int get() {return navigationEntries.size}
 
     fun reset(startEntry: NavigationEntry,
               @IdRes drawerMenuItemId: Int,
-              toolBarTitle: String){
+              @StringRes toolBarTitle: Int){
 
         if(navigationEntries.isNotEmpty() || navigationStack.isNotEmpty()){
             statesStack.push(NavigationManagerState(currentDrawerMenuItemId, currentToolBarTitle, navigationEntries, navigationStack))
@@ -68,8 +65,7 @@ class NavigationManager {
             removed.filesNode.release()
             navigationEntries.last()
         }
-        if(result.filesNode.source.notExists){
-            showToast(getStringFromRes(R.string.open_file_error) + ": " + result.filesNode.source.name)
+        if(result.filesNode.folder.notExists){
             return navigateBack()
         }
         return result
@@ -92,10 +88,10 @@ class NavigationManager {
 
     fun current(): NavigationEntry = navigationEntries.last()
 
-    data class NavigationManagerState(@IdRes val drawerMenuItemId: Int,
-                                             val toolBarTitle: String,
-                                             val navigationEntries: MutableList<NavigationEntry>,
-                                             val navigationEntriesStack: Stack<NavigationStackEntry>)
+    data class NavigationManagerState(@IdRes     val drawerMenuItemId: Int,
+                                      @StringRes val toolBarTitle: Int,
+                                                 val navigationEntries: MutableList<NavigationEntry>,
+                                                 val navigationEntriesStack: Stack<NavigationStackEntry>)
 
     data class NavigationEntry(val nodeName: String,
                                var filesNode: AbstractFilesNode,

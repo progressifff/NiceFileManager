@@ -1,26 +1,48 @@
 package com.progressifff.filemanager
 
-import android.os.Handler
-import com.progressifff.filemanager.models.AbstractStorageFile
+import android.support.annotation.StringRes
+import com.progressifff.filemanager.AbstractStorageFile
 import io.reactivex.Completable
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableCompletableObserver
 import java.lang.Exception
 import java.util.concurrent.atomic.AtomicReference
 
-class FilesTasksManager {
-
-    private val handler = Handler(App.get().mainLooper)
+object FilesTasksManager {
 
     private val tasks = arrayListOf<AbstractTask>()
 
     private val tasksIndicesMap = hashMapOf<Int, Int>()
 
-    private object Holder { val instance = FilesTasksManager() }
-
     val tasksCount: Int get() = tasks.size
 
-    var fileTaskStatusListener: FileTaskStatusListener? = null
+    var eventsListener: EventsListener? = null
+
+    private val taskListener = object: AbstractTask.TaskListener {
+
+        @Synchronized
+        override fun onTaskUpdated(task: AbstractTask) {
+            val taskId = task.id
+            App.get().handler.post {
+                if (tasksIndicesMap.containsKey(taskId)) {
+                    eventsListener?.onTaskUpdated(tasksIndicesMap[task.id]!!)
+                }
+            }
+        }
+
+        @Synchronized
+        override fun onError(messageId: Int) {
+            App.get().handler.post {
+                eventsListener?.onError(messageId)
+            }
+        }
+
+        override fun onTaskCompleted(task: AbstractTask) {
+            val taskIndex = tasksIndicesMap[task.id]!!
+            removeTask(taskIndex)
+            eventsListener?.onTaskUpdated(taskIndex, true)
+        }
+    }
 
     fun removeTask(index: Int){
         try{
@@ -30,7 +52,7 @@ class FilesTasksManager {
             for((i, task) in tasks.withIndex()) {
                 tasksIndicesMap[task.id] = i
             }
-            fileTaskStatusListener?.onTaskUpdated(index, true)
+            eventsListener?.onTaskUpdated(index, true)
         }
         catch (e: Exception) {
             e.printStackTrace()
@@ -43,27 +65,12 @@ class FilesTasksManager {
             return
         }
 
-        task.listener = object: AbstractTask.TaskListener{
-            override fun onTaskUpdated(task: AbstractTask) {
-                val taskId = task.id
-                handler.post{
-                    if(tasksIndicesMap.containsKey(taskId)){
-                        fileTaskStatusListener?.onTaskUpdated(tasksIndicesMap[task.id]!!)
-                    }
-                }
-            }
-
-            override fun onTaskCompleted(task: AbstractTask) {
-                val taskIndex = tasksIndicesMap[task.id]!!
-                removeTask(taskIndex)
-                fileTaskStatusListener?.onTaskUpdated(taskIndex, true)
-            }
-        }
+        task.listener = taskListener
 
         val executeTask: () -> Unit = {
             tasks.add(task)
             tasksIndicesMap[task.id] = tasks.size - 1
-            fileTaskStatusListener?.onNewTask()
+            eventsListener?.onNewTask()
             task.execute()
         }
 
@@ -71,7 +78,7 @@ class FilesTasksManager {
 
             if(task.destFolder.path == task.files.first().parent!!.path){
                 if(task is CutTask) {
-                    showToast(getStringFromRes(R.string.cut_to_same_folder))
+                    eventsListener?.onError(R.string.cut_to_same_folder)
                     return
                 }
                 else {
@@ -87,7 +94,7 @@ class FilesTasksManager {
                         executeTask()
                     }
 
-                    fileTaskStatusListener?.onProcessingExistingFiles(callback, task.existingFilesNames)
+                    eventsListener?.onProcessingExistingFiles(callback, task.existingFilesNames)
                     return
                 }
             }
@@ -100,14 +107,11 @@ class FilesTasksManager {
         return tasks.elementAt(index)
     }
 
-    companion object {
-        val instance: FilesTasksManager by lazy { return@lazy Holder.instance }
-    }
-
-    interface FileTaskStatusListener{
+    interface EventsListener{
         fun onNewTask()
         fun onTaskUpdated(taskIndex: Int, completed: Boolean = false)
         fun onProcessingExistingFiles(callback: (existingFileAction: AbstractStorageFile.ExistingFileAction) -> Unit, existingFilesNames: ArrayList<String>) {}
+        fun onError(@StringRes messageId: Int)
     }
 }
 
@@ -131,7 +135,6 @@ abstract class AbstractTask(val files: List<AbstractStorageFile>){
     private lateinit var disposable: Disposable
 
     protected fun updateProgress(bytesCount: Long){
-        assert(filesSize != 0L)
         progress.set((bytesCount.toFloat() / filesSize * 100).toInt())
         listener?.onTaskUpdated(this)
     }
@@ -148,7 +151,7 @@ abstract class AbstractTask(val files: List<AbstractStorageFile>){
             }
 
             override fun onError(e: Throwable) {
-                showToast(e.message!!)
+                e.printStackTrace()
                 listener?.onTaskCompleted(this@AbstractTask)
             }
         })
@@ -166,6 +169,7 @@ abstract class AbstractTask(val files: List<AbstractStorageFile>){
     interface TaskListener{
         fun onTaskUpdated(task: AbstractTask)
         fun onTaskCompleted(task: AbstractTask)
+        fun onError(@StringRes messageId: Int)
     }
 }
 
@@ -208,7 +212,6 @@ class CopyTask(files: List<AbstractStorageFile>,
             var bytesCopied = 0L
 
             do{
-
                 var prev = 0L
 
                 val currentTask = it.next().copyRecursivelyAsync(destFolder.path,
@@ -218,10 +221,8 @@ class CopyTask(files: List<AbstractStorageFile>,
                             prev = bytes
                         },
                         ::updateCurrentProcessingFile,
-                        { _, e ->
-                            App.get().handler.post {
-                                showToast(e.message!!)
-                            }
+                        { _, messageId ->
+                            listener?.onError(messageId)
                             OnErrorAction.SKIP
                         },
                         existingFileAction
@@ -255,9 +256,7 @@ class CutTask(files: List<AbstractStorageFile>,
                     currentFile.move(destFolder.path, existingFileAction)
                 }
                 catch (e: Exception){
-                    App.get().handler.post {
-                        showToast(e.message!!)
-                    }
+                    e.printStackTrace()
                 }
                 bytesProcessed += currentFile.size
                 updateProgress(bytesProcessed)

@@ -6,23 +6,19 @@
         android:title="@string/more_options_title"
         android:icon="@drawable/ic_more"
         app:showAsAction="always">
-
         <menu>
             <item
                  android:id="@+id/sortType"
-                 android:title="@string/sort_title"
+                 android:title="@string/sort_menu_item"
                  app:showAsAction="always"/>
-
             <item
                 android:id="@+id/showHiddenFiles"
                 android:checked="false"
                 android:checkable="true"
                 android:title="@string/show_hidden_files"/>
-
             <item
                 android:id="@+id/paste"
                 android:title="@string/paste_action"/>
-
         </menu>
     </item>
 </menu>

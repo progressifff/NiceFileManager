@@ -2,11 +2,11 @@ package com.progressifff.filemanager.dialogs
 
 import android.app.Dialog
 import android.os.Bundle
+import android.widget.Toast
 import com.progressifff.filemanager.PresenterManager
 import com.progressifff.filemanager.R
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.presenters.InputFileNameDialogPresenter
-import com.progressifff.filemanager.showToast
 
 class CreateFolderDialog : InputFileNameDialog() {
 
@@ -20,7 +20,7 @@ class CreateFolderDialog : InputFileNameDialog() {
             InputFileNameDialogPresenter(parentFolder)
         }
         else try{
-            PresenterManager.instance.restorePresenter<InputFileNameDialogPresenter>(savedInstanceState)
+            PresenterManager.restorePresenter<InputFileNameDialogPresenter>(savedInstanceState)
         } catch (e: Exception){
             e.printStackTrace()
             InputFileNameDialogPresenter(parentFolder)
@@ -30,15 +30,13 @@ class CreateFolderDialog : InputFileNameDialog() {
     }
 
     override fun onSuccess() {
-
         val newStorageFile = parentFolder.get(fileNameEditText.text.toString())
-
         try{
             newStorageFile.createFolder()
         }
         catch (e: Exception){
             e.printStackTrace()
-            showToast(getString(R.string.create_folder_error))
+            Toast.makeText(context, context!!.getString(R.string.create_folder_error), Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -1,7 +1,6 @@
 <resources>
-    <!--General-->
     <string name="app_name">File Manager</string>
-    <string name="search_hint">Type to search</string>
+    <string name="search_hint">Search file</string>
     <string name="no_storage_access">Cannot access files.</string>
     <string name="storage_permissions_rationale">Cannot access files.\nFileManager needs the storage permissions to access files.</string>
     <string name="storage_permissions_instruction">Go to Settings, then choose Permissions in App info and give the storage permissions.</string>
@@ -9,11 +8,7 @@
     <string name="settings">Settings</string>
     <string name="no_files">No files</string>
     <string name="no_files_found">No files found</string>
-
     <string name="cut_to_same_folder">The destination file is the same as the source file</string>
-
-    <!-- Home media buttons names -->
-    <string name="folders_card_header">Folders</string>
     <string name="pictures_dir">Pictures</string>
     <string name="dcim_dir">DCIM</string>
     <string name="music_dir">Music</string>
@@ -21,55 +16,29 @@
     <string name="downloads_dir">Downloads</string>
     <string name="documents_dir">Documents</string>
     <string name="movies_dir">Movies</string>
-
-    <!--File menu entries-->
     <string name="rename_menu_entry">Rename</string>
     <string name="delete_menu_entry">Delete</string>
     <string name="copy_menu_entry">Copy</string>
     <string name="cut_menu_entry">Cut</string>
-    <string name="move_to_menu_entry">MoveTo</string>
-    <string name="copy_path_menu_entry">Copy path</string>
     <string name="share_menu_entry">Share</string>
-    <string name="compress_menu_entry">Compress</string>
     <string name="about_menu_entry">About</string>
-    <string name="open_file_location">Open file location</string>
-    <string name="open_folder_location">Open folder location</string>
-
-    <!--Main activity navigation drawer-->
     <string name="main_activity_nav_drawer_open">Open navigation drawer</string>
     <string name="main_activity_nav_drawer_close">Close navigation drawer</string>
     <string name="root_storage_name">Root storage</string>
     <string name="internal_storage_name">Internal</string>
     <string name="storage">Storage</string>
     <string name="media">Media</string>
-
-    <!--Toolbar-->
     <string name="search_title">Search</string>
-
-    <!--Add new item dialog -->
-    <string name="add_new_dialog_header">New</string>
-    <string name="add_new_file">File</string>
-    <string name="add_new_folder">Folder</string>
-
-    <!--Errors-->
-    <string name="open_folder_error">Cannot open this filesNode</string>
-    <string name="title_activity_searchable">SearchableActivity</string>
-
-    <!--multi actionCopy mode-->
     <string name="more_options_title">More options</string>
     <string name="select_all_title">Select all</string>
-    <string name="deselect_all_title">Deselect all</string>
-
-    <!--Rename dialog-->
     <string name="text_input_hint_folder">Folder name</string>
     <string name="text_input_hint_file">File name</string>
     <string name="rename_dialog_title">Rename</string>
     <string name="create_storage_file_dialog_title">Create</string>
-
     <string name="empty_file_name_error">Empty file name</string>
     <string name="file_name_already_exists_error">File name is already exists</string>
     <string name="invalid_file_name_error">Invalid characters:\\/:*?\"&gt;&lt;|</string>
-
+    <string name="sort_menu_item">Sort</string>
     <string name="sort_title">Sort by</string>
     <string name="sort_by_name">Name</string>
     <string name="sort_by_type">Type</string>
@@ -78,32 +47,20 @@
     <string name="show_hidden_files">Show hidden</string>
     <string name="paste_action">Paste</string>
     <string name="file_modified">Modified: </string>
-
-    <!--File details dialog -->
     <string name="file_details_dialog_title">Details</string>
     <string name="file_details_location">Location:</string>
     <string name="file_details_size">Size:</string>
     <string name="file_details_creation_time">Created:</string>
     <string name="file_details_modification_time">Modified:</string>
-
-    <!--Existing files dialog-->
     <string name="existing_files_dialog_title">Existing files</string>
-
-    <!--Errors-->
     <string name="load_files_error">Failed to load files</string>
     <string name="sort_files_error">Failed to sort files</string>
-    <string name="rename_files_error">Failed to rename files</string>
+    <string name="rename_file_error">Failed to rename file</string>
     <string name="create_folder_error">Failed to create folder</string>
-
-    <!--Share-->
     <string name="share_dialog_title">Share</string>
-
-    <!--Open file-->
     <string name="open_file_error">Failed to open file</string>
     <string name="name">Name: </string>
     <string name="task_progress_complete">complete</string>
-
-    <!--Files tasks-->
     <string name="cut_task">Moving</string>
     <string name="copying_task">Copying</string>
     <string name="deleting_task">Deleting</string>
@@ -114,18 +71,21 @@
     <string name="tasks">tasks</string>
     <string name="task">task</string>
     <string name="calculating_files_size">Calculating files size…</string>
-
     <string name="destination_has_such_files">"The destination already has such files"</string>
-
     <string name="delete_file_question">Delete file?</string>
     <string name="delete_files_question">Delete files?</string>
-
     <string name="quit_application_msg">Quit the application?</string>
     <string name="title_activity_settings">Settings</string>
-
     <string name="save_both_action">Save both</string>
     <string name="skip_action">Skip</string>
     <string name="rewrite_action">Rewrite</string>
-
     <string name="calculate_file_size_error">Failed to calculate file size</string>
+    <string name="no_application_to_open_file">"No application found to open the selected file.</string>
+    <string name="file_not_exist">The file doesn\'t exist.</string>
+    <string name="destination_folder_is_subfolder_of_source">The destination folder is a subfolder of the source folder.</string>
+    <string name="copying_file_is_not_exist">The copying file is not exist</string>
+    <string name="in_prefix">in</string>
+    <string name="searching_files_error">An error occurs while searching files.</string>
+    <string name="use_dark_theme">Use dark theme</string>
+    <string name="app_version">App version</string>
 </resources>

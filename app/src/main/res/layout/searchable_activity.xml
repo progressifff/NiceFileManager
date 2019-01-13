@@ -16,7 +16,7 @@
         >
 
         <LinearLayout
-            android:id="@+id/noFilesFoundTextView"
+            android:id="@+id/noFilesFoundView"
             android:orientation="vertical"
             android:layout_width="160dp"
             android:layout_height="160dp"

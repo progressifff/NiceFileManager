@@ -1,11 +1,12 @@
 package com.progressifff.filemanager.presenters
 
-import com.progressifff.filemanager.models.AbstractStorageFile
+import com.progressifff.filemanager.AbstractStorageFile
+import com.progressifff.filemanager.BasePresenter
 import com.progressifff.filemanager.views.InputFileNameDialogView
 import java.util.regex.Pattern
 
-open class InputFileNameDialogPresenter(override var model: AbstractStorageFile) : BasePresenter<AbstractStorageFile, InputFileNameDialogView>() {
-
+open class InputFileNameDialogPresenter(file: AbstractStorageFile) : BasePresenter<AbstractStorageFile, InputFileNameDialogView>() {
+    override var model = file
     private var isIOError = false
     private lateinit var currentIOErrorType: IOErrorType
 
@@ -24,21 +25,20 @@ open class InputFileNameDialogPresenter(override var model: AbstractStorageFile)
             currentIOErrorType = IOErrorType.EMPTY_FILE_NAME
             updateView()
         }
-        else if(!isIOError){
-            if(isFileNameChanged(inputFileName) && model.hasChild(inputFileName)){
+        else if(!isIOError && isFileNameChanged(inputFileName)){
+            if(model.contains(inputFileName)){
                 isIOError = true
                 currentIOErrorType = IOErrorType.FILE_ALREADY_EXISTS
                 updateView()
-                return
             }
-            if(isFileNameChanged(inputFileName)){
+            else{
                 updateView()
+                view?.dismiss()
             }
-            view?.dismiss()
         }
     }
 
-    open fun isFileNameChanged(inputFileName: String): Boolean {return true}
+    open fun isFileNameChanged(inputFileName: String): Boolean = true
 
     fun beforeInputTextChanged() {
         if(!isIOError){

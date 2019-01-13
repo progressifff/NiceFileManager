@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.annotation.StringRes
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.*
 import android.support.v4.app.FragmentTransaction
@@ -45,11 +46,11 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var navigationBarListAdapter: RecyclerView.Adapter<*>
     private lateinit var navigationBarListLayoutManager: RecyclerView.LayoutManager
     private lateinit var searchView: SearchView
-    private val filesTaskView = FilesTaskView(R.id.filesTasks)
+    private val filesTaskView = FilesTasks(R.id.filesTasks)
     private lateinit var quitAppBar: Snackbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if(getBooleanFromSharedPreferences(USE_DARK_THEME_KEY, false)){
+        if(AppPreferences.getBoolean(USE_DARK_THEME_KEY, false)){
             setTheme(R.style.AppThemeDark)
         }
         else{
@@ -63,15 +64,15 @@ class MainActivity : AppCompatActivity(), MainView {
 
         //Create presenter
         if(savedInstanceState == null){
-            presenter = MainPresenter()
+            presenter = MainPresenter(AppPreferences, EnvironmentStandardPaths)
             setupFilesFragment()
         }
         else{
             presenter = try{
-                PresenterManager.instance.restorePresenter(savedInstanceState)
+                PresenterManager.restorePresenter(savedInstanceState)
             } catch (e: Exception){
                 e.printStackTrace()
-                MainPresenter()
+                MainPresenter(AppPreferences, EnvironmentStandardPaths)
             }
         }
 
@@ -99,14 +100,9 @@ class MainActivity : AppCompatActivity(), MainView {
                 this, drawerLayout, toolBar,
                 R.string.main_activity_nav_drawer_open,
                 R.string.main_activity_nav_drawer_close)
-
-
         drawerLayout.addDrawerListener(drawerToggle)
-
         drawerLayout.addDrawerListener(presenter.navigationDrawerListener)
-
         drawerToggle.syncState()
-
         navigationView = findViewById(R.id.main_activity_nav_view)
         navigationView.setNavigationItemSelectedListener {menuItem ->
             return@setNavigationItemSelectedListener presenter.onNavigationDrawerItemSelected(navigationView.menu, menuItem)
@@ -144,7 +140,7 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         filesTaskView.onSaveInstance(outState)
-        PresenterManager.instance.savePresenter(presenter, outState)
+        PresenterManager.savePresenter(presenter, outState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -226,12 +222,10 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun onBackPressed() {
         if(!searchView.onBackPressed() && !presenter.onBackPressed()) {
-
             val finalize: () -> Unit = {
                 filesTaskView.release()
                 super.onBackPressed()
             }
-
             if(!::quitAppBar.isInitialized){
                 quitAppBar = Snackbar.make(findViewById(R.id.mainActivityContent), getString(R.string.quit_application_msg), Snackbar.LENGTH_SHORT)
                 quitAppBar.view.findViewById<TextView>(android.support.design.R.id.snackbar_text).setTextColor(Color.WHITE)
@@ -246,8 +240,8 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
 
-    override fun setToolBarTitle(title: String) {
-        supportActionBar!!.title = title
+    override fun setToolBarTitle(@StringRes title: Int) {
+        supportActionBar!!.title = getString(title)
     }
 
     override fun updateNavigationBar() {
@@ -266,9 +260,8 @@ class MainActivity : AppCompatActivity(), MainView {
     }
 
     override fun setCheckedDrawerMenuItem(menuItemId: Int) {
-        navigationView.menu.uncheckItems()
+        navigationView.setCheckedItem(menuItemId)
         navigationView.menu.findItem(menuItemId).isChecked = true
-        navigationView.invalidate()
     }
 
     override fun setFilesDisplayModeButton(filesDisplayMode: MainPresenter.FilesDisplayMode) {
@@ -295,7 +288,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun openSettings() {
         val startSettingsIntent = Intent(this, SettingsActivity::class.java)
-        startSettingsIntent.putExtra(USE_DARK_THEME_KEY, getBooleanFromSharedPreferences(USE_DARK_THEME_KEY))
+        startSettingsIntent.putExtra(USE_DARK_THEME_KEY, AppPreferences.getBoolean(USE_DARK_THEME_KEY))
         startActivityForResult(startSettingsIntent, SETTINGS_ACTIVITY_REQUEST_CODE)
     }
 

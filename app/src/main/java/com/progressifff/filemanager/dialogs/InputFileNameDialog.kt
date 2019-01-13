@@ -10,7 +10,6 @@ import android.text.TextWatcher
 import android.widget.EditText
 import com.progressifff.filemanager.PresenterManager
 import com.progressifff.filemanager.R
-import com.progressifff.filemanager.getStringFromRes
 import com.progressifff.filemanager.presenters.InputFileNameDialogPresenter
 import com.progressifff.filemanager.views.InputFileNameDialogView
 
@@ -22,7 +21,7 @@ abstract class InputFileNameDialog : DialogFragment(), InputFileNameDialogView {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        PresenterManager.instance.savePresenter(presenter, outState)
+        PresenterManager.savePresenter(presenter, outState)
     }
 
     override fun onStart() {
@@ -43,9 +42,9 @@ abstract class InputFileNameDialog : DialogFragment(), InputFileNameDialogView {
     override fun showError(errorType: InputFileNameDialogPresenter.IOErrorType) {
         fileNameInputLayout.isErrorEnabled = true
         when(errorType){
-            InputFileNameDialogPresenter.IOErrorType.INVALID_FILE_NAME -> fileNameInputLayout.error = getStringFromRes(R.string.invalid_file_name_error)
-            InputFileNameDialogPresenter.IOErrorType.EMPTY_FILE_NAME -> fileNameInputLayout.error = getStringFromRes(R.string.empty_file_name_error)
-            InputFileNameDialogPresenter.IOErrorType.FILE_ALREADY_EXISTS -> fileNameInputLayout.error = getStringFromRes(R.string.file_name_already_exists_error)
+            InputFileNameDialogPresenter.IOErrorType.INVALID_FILE_NAME -> fileNameInputLayout.error = context!!.getString(R.string.invalid_file_name_error)
+            InputFileNameDialogPresenter.IOErrorType.EMPTY_FILE_NAME -> fileNameInputLayout.error = context!!.getString(R.string.empty_file_name_error)
+            InputFileNameDialogPresenter.IOErrorType.FILE_ALREADY_EXISTS -> fileNameInputLayout.error = context!!.getString(R.string.file_name_already_exists_error)
         }
     }
 
@@ -91,6 +90,6 @@ abstract class InputFileNameDialog : DialogFragment(), InputFileNameDialogView {
             R.string.text_input_hint_folder
         }
         else R.string.text_input_hint_file
-        fileNameInputLayout.hint = getStringFromRes(hintId)
+        fileNameInputLayout.hint = context!!.getString(hintId)
     }
 }

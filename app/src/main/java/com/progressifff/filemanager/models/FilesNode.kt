@@ -2,14 +2,14 @@ package com.progressifff.filemanager.models
 
 import android.os.FileObserver
 import android.util.Log
+import com.progressifff.filemanager.AbstractFilesNode
+import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.App
-import com.progressifff.filemanager.Constants.SHOW_HIDDEN_FILES_KEY
-import com.progressifff.filemanager.getBooleanFromSharedPreferences
 import kotlin.properties.Delegates
 
 class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
 
-    var hiddenFilesAreShown: Boolean by Delegates.observable(false){
+    var includeHiddenFiles: Boolean by Delegates.observable(false){
         _, old, new ->
         if(new != old && files.isNotEmpty()){
             load()
@@ -34,16 +34,15 @@ class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
             }
         }
 
-        hiddenFilesAreShown = getBooleanFromSharedPreferences(SHOW_HIDDEN_FILES_KEY)
         startEventWatching()
     }
 
-    override fun check(file: AbstractStorageFile): Boolean = !(!hiddenFilesAreShown && file.isHidden)
+    override fun check(file: AbstractStorageFile): Boolean = !(!includeHiddenFiles && file.isHidden)
 
     override fun release(){
         synchronized(fileEventObservers){
-            if(fileEventObservers.containsKey(source.path)){
-                val observers = fileEventObservers[source.path]
+            if(fileEventObservers.containsKey(folder.path)){
+                val observers = fileEventObservers[folder.path]
                 if(observers != null){
                     observers.remove(this)
                     if(observers.isEmpty()){
@@ -56,10 +55,10 @@ class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
 
     private fun startEventWatching(){
         synchronized(fileEventObservers) {
-            if(!fileEventObservers.containsKey(source.path)) {
-                fileEventObservers[source.path] = HashSet()
+            if(!fileEventObservers.containsKey(folder.path)) {
+                fileEventObservers[folder.path] = HashSet()
             }
-            val observers = fileEventObservers[source.path]
+            val observers = fileEventObservers[folder.path]
             if(!observers!!.contains(this)) {
                 observers.add(this)
             }

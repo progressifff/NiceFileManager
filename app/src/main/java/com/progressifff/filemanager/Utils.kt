@@ -1,6 +1,7 @@
 package com.progressifff.filemanager
 
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v7.preference.PreferenceManager
@@ -13,40 +14,63 @@ import java.io.InputStream
 import java.io.OutputStream
 import android.graphics.Point
 import android.view.WindowManager
+import java.lang.AssertionError
 
+object Utils{
+    fun showOpenFileDialog(context: Context, file: AbstractStorageFile){
+        if(file.isDirectory){
+            Toast.makeText(context, context.getString(R.string.open_file_error), Toast.LENGTH_SHORT).show()
+        }
+        val mimeType = file.mimeType
+        val apkMimeType = "application/vnd.android.package-archive"
+        val intentAction = if(mimeType == apkMimeType) Intent.ACTION_INSTALL_PACKAGE else Intent.ACTION_VIEW
+        val intent = Intent(intentAction)
+        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+        val uri = FileUriProvider.getUri(file)
+        intent.setDataAndType(uri, mimeType)
 
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        }
+        else{
+            Toast.makeText(context, context.getString(R.string.no_application_to_open_file), Toast.LENGTH_SHORT).show()
+        }
+    }
 
+    fun showShareFileDialog(context: Context, file: AbstractStorageFile){
+        assert(!file.isDirectory)
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, FileUriProvider.getUri(file))
+            type = file.mimeType
+        }
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_dialog_title)))
+    }
 
-fun saveStringToSharedPreferences(key: String, value: String){
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.get())
-    val editor = sharedPreferences.edit()
-    editor.putString(key, value)
-    editor.apply()
-}
+    fun calculateGridColumnsCount(): Int {
+        val resources = App.get().resources
+        val fileCardWidth = resources.getDimensionPixelSize(R.dimen.file_card_width)
+        val filesGridItemMinSpacing = resources.getDimensionPixelSize(R.dimen.files_grid_item_min_spacing)
 
-fun saveBooleanToSharedPreferences(key: String, value: Boolean){
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.get())
-    val editor = sharedPreferences.edit()
-    editor.putBoolean(key, value)
-    editor.apply()
-}
+        val windowManger = App.get().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val size = Point()
+        windowManger.defaultDisplay.getSize(size)
 
-fun getBooleanFromSharedPreferences(key: String, defaultValue: Boolean = false): Boolean{
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.get())
-    return sharedPreferences.getBoolean(key, defaultValue)
-}
+        var columnsCount = size.x / fileCardWidth
 
-fun getStringFromSharedPreferences(key: String, defaultValue: String = ""): String{
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.get())
-    return sharedPreferences.getString(key, defaultValue)!!
-}
+        if((columnsCount < 1)) {
+            throw AssertionError("Null columns count")
+        }
 
-fun showToast(message: String){
-    Toast.makeText(App.get(), message, Toast.LENGTH_SHORT).show()
-}
+        if(columnsCount > 1){
+            val spacing = (size.x % fileCardWidth) / columnsCount / 2
+            if(spacing < filesGridItemMinSpacing){
+                columnsCount -= 1
+            }
+        }
 
-fun getStringFromRes(id: Int): String{
-    return App.get().getString(id)
+        return columnsCount
+    }
 }
 
 fun Int.toDp(): Int = (this / Resources.getSystem().displayMetrics.density).toInt()
@@ -96,12 +120,6 @@ fun View.gone(){
     this.visibility = View.GONE
 }
 
-fun disposeResource(disposable: Disposable?){
-    if(disposable != null && !disposable.isDisposed){
-        disposable.dispose()
-    }
-}
-
 fun View.bottomSheetBehavior(): BottomSheetBehavior<*>{
     return BottomSheetBehavior.from(this)
 }
@@ -114,29 +132,6 @@ val ListView.isScrollable: Boolean get() {
     }
     val child = this.getChildAt(this.lastVisiblePosition)
     return child != null && this.getChildAt(this.lastVisiblePosition).bottom > this.height
-}
-
-fun calculateGridColumnsCount(): Int {
-    val resources = App.get().resources
-    val fileCardWidth = resources.getDimensionPixelSize(R.dimen.file_card_width)
-    val filesGridItemMinSpacing = resources.getDimensionPixelSize(R.dimen.files_grid_item_min_spacing)
-
-    val windowManger = App.get().getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val size = Point()
-    windowManger.defaultDisplay.getSize(size)
-
-    var columnsCount = size.x / fileCardWidth
-
-    assert(columnsCount > 0)
-
-    if(columnsCount > 1){
-        val spacing = (size.x % fileCardWidth) / columnsCount / 2
-        if(spacing < filesGridItemMinSpacing){
-            columnsCount -= 1
-        }
-    }
-
-    return columnsCount
 }
 
 fun View.runOnLayoutChanged(func: () -> Unit){

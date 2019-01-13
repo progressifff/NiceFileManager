@@ -11,6 +11,10 @@ class App : Application() {
     companion object {
         private lateinit var instance: App
         fun get(): App {return instance}
+
+        init {
+            System.loadLibrary("native-lib")
+        }
     }
 
     override fun onCreate() {

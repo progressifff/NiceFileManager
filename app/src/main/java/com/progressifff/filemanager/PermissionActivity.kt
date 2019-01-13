@@ -13,7 +13,7 @@ class PermissionActivity : AppCompatActivity() {
     private lateinit var permissionsInstructionFragment: PermissionsInstructionFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if(getBooleanFromSharedPreferences(Constants.USE_DARK_THEME_KEY, false)){
+        if(AppPreferences.getBoolean(Constants.USE_DARK_THEME_KEY, false)){
             setTheme(R.style.AppThemeDark)
         }
         else{

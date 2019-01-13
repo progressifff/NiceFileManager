@@ -14,7 +14,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        if(getBooleanFromSharedPreferences(USE_DARK_THEME_KEY)){
+        if(AppPreferences.getBoolean(USE_DARK_THEME_KEY)){
             setTheme(R.style.AppThemeDark)
         }
         else{
@@ -45,7 +45,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setActivityResult(){
-        if(intent.getBooleanExtra(USE_DARK_THEME_KEY, false) != getBooleanFromSharedPreferences(USE_DARK_THEME_KEY)) {
+        if(intent.getBooleanExtra(USE_DARK_THEME_KEY, false) != AppPreferences.getBoolean(USE_DARK_THEME_KEY)) {
             setResult(RESULT_THEME_CHANGED)
         }
         else{

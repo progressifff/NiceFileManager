@@ -1,48 +1,40 @@
-package com.progressifff.filemanager.models
+package com.progressifff.filemanager
 
-import com.progressifff.filemanager.*
-import com.progressifff.filemanager.Constants.SORT_TYPE_KEY
+import com.progressifff.filemanager.models.FilesNode
+import com.progressifff.filemanager.models.StorageFile
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
-import java.lang.ref.WeakReference
 import kotlin.properties.Delegates
 
-abstract class AbstractFilesNode(val source: AbstractStorageFile) {
-
+abstract class AbstractFilesNode(val folder: AbstractStorageFile) {
     var files = arrayListOf<AbstractStorageFile>()
+    protected set
     val eventsListeners = ArrayList<EventsListener>()
     val isEmpty: Boolean get() = files.isEmpty()
     var isLoaded = false
         private set
 
-    private var loadFilesDisposable = WeakReference<Disposable>(null)
-    private var sortFilesDisposable = WeakReference<Disposable>(null)
+    private lateinit var loadFilesDisposable: Disposable
+    private lateinit var sortFilesDisposable: Disposable
 
-    var sortFilesType: SortFilesType by Delegates.observable(SortFilesType.NAME) {
-        _, old, new ->
-        if(new != old){
-            saveStringToSharedPreferences(
-                    SORT_TYPE_KEY,
-                    new.name)
-            if(files.isNotEmpty()) {
-                sort()
-            }
-        }
-    }
-
-    var isDescendingSort: Boolean by Delegates.observable(true){
-        _, old, new ->
-        if(new != old && files.isNotEmpty()) {
+    var sortFilesType = SortFilesType.NAME
+    set(value) {
+        if(field != value){
+            field = value
             sort()
         }
     }
 
-    init {
-        sortFilesType = SortFilesType.fromString(getStringFromSharedPreferences(SORT_TYPE_KEY, SortFilesType.NAME.name))
-    }
+    var isDescendingSort = true
+        set(value) {
+            if(field != value){
+                field = value
+                sort()
+            }
+        }
 
     fun subscribe(listener: EventsListener){
         eventsListeners.add(listener)
@@ -53,52 +45,46 @@ abstract class AbstractFilesNode(val source: AbstractStorageFile) {
     }
 
     fun sort(){
-
-        if(files.isEmpty()){
+        if(files.isEmpty()) {
             return
         }
-
-        if (sortFilesDisposable.get() != null) {
-            disposeResource(sortFilesDisposable.get())
+        if(::sortFilesDisposable.isInitialized && !sortFilesDisposable.isDisposed){
+            sortFilesDisposable.dispose()
         }
-
         for(observer in eventsListeners){
             observer.onStartUpdate()
         }
-
-        sortFilesDisposable = WeakReference(getSortAsyncItem(files)
-                .subscribeWith(object : DisposableSingleObserver<ArrayList<AbstractStorageFile>>() {
-                    override fun onSuccess(files: ArrayList<AbstractStorageFile>) {
-                        this@AbstractFilesNode.files = files
-                        sortFilesDisposable.clear()
-                        for(observer in eventsListeners){
-                            observer.onUpdated()
-                        }
-                    }
-
-                    override fun onError(e: Throwable) {
-                        e.printStackTrace()
-                        sortFilesDisposable.clear()
-                        for(observer in eventsListeners){
-                            observer.onError(App.get().getString(R.string.sort_files_error))
-                        }
+        sortFilesDisposable = getSortObject(files)
+            .subscribeWith(object : DisposableSingleObserver<ArrayList<AbstractStorageFile>>() {
+                override fun onSuccess(files: ArrayList<AbstractStorageFile>) {
+                    this@AbstractFilesNode.files = files
+                    for(observer in eventsListeners){
+                        observer.onUpdated()
                     }
                 }
-            )
+
+                override fun onError(e: Throwable) {
+                    e.printStackTrace()
+                    for(observer in eventsListeners){
+                        observer.onError(R.string.sort_files_error)
+                    }
+                }
+            }
         )
     }
 
     fun load() {
-        if(loadFilesDisposable.get() != null) {
-            disposeResource(loadFilesDisposable.get())
+
+        if(::loadFilesDisposable.isInitialized && !loadFilesDisposable.isDisposed){
+            loadFilesDisposable.dispose()
         }
 
         for(observer in eventsListeners){
             observer.onStartUpdate()
         }
 
-        val filesSource = source.openAsDir()
-        loadFilesDisposable = WeakReference(filesSource.flatMap { data -> //Reorder: at first folders, then files
+        val filesSource = folder.openAsDir()
+        loadFilesDisposable = filesSource.flatMap { data -> //Reorder: at first folders, then files
             Single.create<ArrayList<AbstractStorageFile>>{
                 val files = arrayListOf<AbstractStorageFile>()
                 val folders = arrayListOf<AbstractStorageFile>()
@@ -127,34 +113,31 @@ abstract class AbstractFilesNode(val source: AbstractStorageFile) {
                 }
             }
         }
-        .flatMap { files -> getSortAsyncItem(files) }
+        .flatMap { files -> getSortObject(files) }
         .subscribeWith(object : DisposableSingleObserver<ArrayList<AbstractStorageFile>>(){
             override fun onSuccess(files: ArrayList<AbstractStorageFile>) {
                 this@AbstractFilesNode.files = files
-                loadFilesDisposable.clear()
                 isLoaded = true
 
                 for(observer in eventsListeners){
                     observer.onUpdated()
                 }
-
             }
 
             override fun onError(e: Throwable) {
                 e.printStackTrace()
-                loadFilesDisposable.clear()
                 for(observer in eventsListeners){
-                    observer.onError(App.get().getString(R.string.load_files_error))
+                    observer.onError(R.string.load_files_error)
                 }
             }
-        }))
+        })
     }
 
     fun get(index: Int): AbstractStorageFile = files.elementAt(index)
 
     open fun release() {}
 
-    private fun getSortAsyncItem(files: ArrayList<AbstractStorageFile>): Single<ArrayList<AbstractStorageFile>> {
+    private fun getSortObject(files: ArrayList<AbstractStorageFile>): Single<ArrayList<AbstractStorageFile>> {
         val sortList: (list: MutableList<AbstractStorageFile>) -> Unit = { _files ->
 
             val sorted = when(sortFilesType) {
@@ -245,13 +228,22 @@ abstract class AbstractFilesNode(val source: AbstractStorageFile) {
         }
     }
 
+    companion object {
+        fun create(source: AbstractStorageFile): AbstractFilesNode{
+            if(source is StorageFile) {
+                return FilesNode(source)
+            }
+            throw AssertionError("Unsupported type")
+        }
+    }
+
     interface EventsListener{
         fun onFileChanged(index: Int)
         fun onFileRemoved(index: Int)
         fun onFileCreated(index: Int)
         fun onUpdated()
         fun onStartUpdate()
-        fun onError(msg: String)
+        fun onError(messageId: Int)
     }
 
     enum class SortFilesType{
