@@ -2,13 +2,11 @@ package com.progressifff.filemanager
 
 import android.os.Parcelable
 import com.progressifff.filemanager.dialogs.FileActionsDialog
-import com.progressifff.filemanager.AbstractFilesNode
-import com.progressifff.filemanager.AbstractStorageFile
 import com.progressifff.filemanager.presenters.MainPresenter
 
 class RxEvent {
 
-    data class NavigateEvent(val filesNode: AbstractFilesNode, val filesListState: Parcelable? = null)
+    data class NavigateEvent(val filesNode: AbstractFilesNode, val filesListState: Parcelable? = null, var processed: () -> Unit = {})
 
     data class SaveFilesStateEvent(val filesNode: AbstractFilesNode, val filesListState: Parcelable)
 

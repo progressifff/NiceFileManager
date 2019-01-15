@@ -47,7 +47,7 @@ class FilesFragment : Fragment(), NestedFilesView {
             FilesPresenter(AppPreferences, RxBus, FilesClipboard, FileImageManager)
         }
 
-        activity!!.findViewById<FloatingActionButton>(R.id.addFolderFab).setOnClickListener(presenter.onViewClickListener)
+        activity!!.findViewById<FloatingActionButton>(R.id.addFolderFab).setOnClickListener(presenter.viewClickListener)
         val view = inflater.inflate(R.layout.files_fragment, container, false)
 
         noFilesMessage = view.findViewById(R.id.noFilesMsgView)
@@ -70,29 +70,26 @@ class FilesFragment : Fragment(), NestedFilesView {
         filesListLinearLayoutManager = LinearLayoutManager(context)
         filesListGridLayoutManager = GridLayoutManager(context, Utils.calculateGridColumnsCount())
         filesListGridLayoutDecoration = RecyclerViewGridLayoutDecoration()
-
         filesList.apply{
             setHasFixedSize(true)
             setItemViewCacheSize(40)
             adapter = filesListAdapter
         }
-
         filesList.addOnScrollListener(object : RecyclerView.OnScrollListener(){
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 filesListRefresher.isEnabled = (recyclerView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0
             }
         })
 
-        if(savedInstanceState != null){
-            val filesDisplayMode = MainPresenter.FilesDisplayMode.fromString(AppPreferences.getString(Constants.FILES_DISPLAY_MODE_KEY, MainPresenter.FilesDisplayMode.LIST.name))
-            when(filesDisplayMode){
-                MainPresenter.FilesDisplayMode.LIST -> filesList.layoutManager = filesListLinearLayoutManager
-                MainPresenter.FilesDisplayMode.GRID -> {
-                    filesList.layoutManager = filesListGridLayoutManager
-                    filesList.addItemDecoration(filesListGridLayoutDecoration)
-                }
+        val filesDisplayMode = MainPresenter.FilesDisplayMode.fromString(AppPreferences.getString(Constants.FILES_DISPLAY_MODE_KEY, MainPresenter.FilesDisplayMode.LIST.name))
+        when(filesDisplayMode){
+            MainPresenter.FilesDisplayMode.LIST -> filesList.layoutManager = filesListLinearLayoutManager
+            MainPresenter.FilesDisplayMode.GRID -> {
+                filesList.layoutManager = filesListGridLayoutManager
+                filesList.addItemDecoration(filesListGridLayoutDecoration)
             }
         }
+
         filesList.runOnLayoutChanged { setupToolBarScrollingBehavior(filesList.isScrollable) }
     }
 
@@ -128,30 +125,32 @@ class FilesFragment : Fragment(), NestedFilesView {
     }
 
     override fun setFilesInListLayout() {
-        val firstVisibleItemPosition = (filesList.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
-        filesList.layoutManager = filesListLinearLayoutManager
-        filesList.removeItemDecoration(filesListGridLayoutDecoration)
-        filesList.adapter = filesListAdapter
-        filesList.runOnLayoutChanged {
-            setupToolBarScrollingBehavior(filesList.isScrollable)
+        if(filesList.layoutManager is GridLayoutManager){
+            val firstVisibleItemPosition = (filesList.layoutManager as? GridLayoutManager)?.findFirstCompletelyVisibleItemPosition()
+            filesList.layoutManager = filesListLinearLayoutManager
+            filesList.removeItemDecoration(filesListGridLayoutDecoration)
             filesList.adapter = filesListAdapter
-            if(firstVisibleItemPosition != null) filesList.layoutManager!!.scrollToPosition(firstVisibleItemPosition)
+            filesList.runOnLayoutChanged {
+                setupToolBarScrollingBehavior(filesList.isScrollable)
+                filesList.adapter = filesListAdapter
+                if(firstVisibleItemPosition != null) filesList.layoutManager!!.scrollToPosition(firstVisibleItemPosition)
+            }
         }
     }
 
     override fun setFilesInGridLayout() {
-        val firstVisibleItemPosition = (filesList.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
-
-        filesListGridLayoutManager.spanCount = Utils.calculateGridColumnsCount()
-        filesList.layoutManager = filesListGridLayoutManager
-
-        filesList.adapter = filesListAdapter
-        filesList.runOnLayoutChanged {
-            setupToolBarScrollingBehavior(filesList.isScrollable)
-            filesList.addItemDecoration(filesListGridLayoutDecoration)
+        if(filesList.layoutManager !is GridLayoutManager){
+            val firstVisibleItemPosition = (filesList.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
+            filesListGridLayoutManager.spanCount = Utils.calculateGridColumnsCount()
+            filesList.layoutManager = filesListGridLayoutManager
             filesList.adapter = filesListAdapter
+            filesList.runOnLayoutChanged {
+                setupToolBarScrollingBehavior(filesList.isScrollable)
+                filesList.addItemDecoration(filesListGridLayoutDecoration)
+                filesList.adapter = filesListAdapter
 
-            if(firstVisibleItemPosition != null) filesList.layoutManager!!.scrollToPosition(firstVisibleItemPosition)
+                if(firstVisibleItemPosition != null) filesList.layoutManager!!.scrollToPosition(firstVisibleItemPosition)
+            }
         }
     }
 

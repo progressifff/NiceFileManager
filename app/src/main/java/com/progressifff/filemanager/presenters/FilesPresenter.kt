@@ -57,7 +57,7 @@ class FilesPresenter(private val appPreferences: Preferences,
         }
     }
 
-    val onViewClickListener = View.OnClickListener {v->
+    val viewClickListener = View.OnClickListener { v->
         when(v.id){
             R.id.addFolderFab -> view!!.showCreateFolderDialog(model.folder)
         }
@@ -73,9 +73,7 @@ class FilesPresenter(private val appPreferences: Preferences,
 
     override fun bindView(@NonNull v: NestedFilesView){
         super.bindView(v)
-
         if(multiSelectMode.running){ view!!.startActionMode(multiSelectMode) }
-
         filesClipboard.filesClipboardListener = clipboardListener
 
         navigateEventListenerDisposable = eventBus.listen(
@@ -102,9 +100,7 @@ class FilesPresenter(private val appPreferences: Preferences,
     }
 
     override fun unbindView() {
-        if(multiSelectMode.running){
-            multiSelectMode.saveState()
-        }
+        if(multiSelectMode.running){ multiSelectMode.saveState() }
         navigateEventListenerDisposable.dispose()
         navDrawerStateListenerDisposable.dispose()
         displayModeEventListenerDisposable.dispose()
@@ -149,6 +145,7 @@ class FilesPresenter(private val appPreferences: Preferences,
         }
 
         view?.restoreFilesListState(event.filesListState)
+        event.processed()
     }
 
     private fun onNavigationDrawerStateChangedEvent(event: RxEvent.NavigationDrawerStateChangedEvent) {

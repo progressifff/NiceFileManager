@@ -26,8 +26,7 @@ class MainPresenter(private var appPreferences: Preferences, private var standar
             R.id.filesOrderModeBtn -> {filesOrderMode = if(filesOrderMode == FilesOrderMode.ASCENDING) FilesOrderMode.DESCENDING else FilesOrderMode.ASCENDING}
         }
     }
-
-    var filesDisplayMode: FilesDisplayMode by Delegates.observable(FilesDisplayMode.LIST){
+    var filesDisplayMode: FilesDisplayMode by Delegates.observable(FilesDisplayMode.fromString(appPreferences.getString(Constants.FILES_DISPLAY_MODE_KEY, FilesDisplayMode.LIST.name))){
             _, old, new ->
         if(new != old){
             appPreferences.saveString(FILES_DISPLAY_MODE_KEY, new.name)
@@ -35,8 +34,7 @@ class MainPresenter(private var appPreferences: Preferences, private var standar
         RxBus.publish(RxEvent.FilesDisplayModeChangedEvent(new))
         view?.setFilesDisplayModeButton(new)
     }
-
-    var filesOrderMode: FilesOrderMode by Delegates.observable(FilesOrderMode.ASCENDING){
+    var filesOrderMode: FilesOrderMode by Delegates.observable(FilesOrderMode.fromString(appPreferences.getString(Constants.FILES_ORDER_MODE_KEY, MainPresenter.FilesOrderMode.ASCENDING.name))){
         _, old, new ->
         if(new != old){
             appPreferences.saveString(FILES_ORDER_MODE_KEY, new.name)
@@ -44,10 +42,10 @@ class MainPresenter(private var appPreferences: Preferences, private var standar
         RxBus.publish(RxEvent.FilesOrderModeChangedEvent(new))
         view?.setFilesOrderModeButton(new)
     }
-
     val navigationEntriesCount: Int get() = model.navigationEntriesCount
     private lateinit var saveFilesStateEventListenerDisposable: Disposable
     private lateinit var openFolderEventListenerDisposable: Disposable
+    private var isInitialNavigationPerformed = false
 
     init {
         val initialFilesNode = FilesNode(StorageFile(standardPaths.getInternalStoragePath()))
@@ -55,15 +53,24 @@ class MainPresenter(private var appPreferences: Preferences, private var standar
         initialFilesNode.sortFilesType = AbstractFilesNode.SortFilesType.fromString(
                 appPreferences.getString(SORT_TYPE_KEY, AbstractFilesNode.SortFilesType.NAME.name))
         model.add(NavigationManager.NavigationEntry("Internal storage", initialFilesNode))
-        filesDisplayMode = FilesDisplayMode.fromString(appPreferences.getString(Constants.FILES_DISPLAY_MODE_KEY, FilesDisplayMode.LIST.name))
-        filesOrderMode = FilesOrderMode.fromString(appPreferences.getString(Constants.FILES_ORDER_MODE_KEY, MainPresenter.FilesOrderMode.ASCENDING.name))
-        RxBus.publish(RxEvent.NavigateEvent(model.current().filesNode))
+        RxBus.publish(RxEvent.NavigateEvent(model.current().filesNode, processed = {
+            isInitialNavigationPerformed = true
+            RxBus.publish(RxEvent.FilesDisplayModeChangedEvent(filesDisplayMode))
+            RxBus.publish(RxEvent.FilesOrderModeChangedEvent(filesOrderMode))
+        }))
         model.currentDrawerMenuItemId = R.id.internal_storage
         model.currentToolBarTitle = R.string.storage
     }
 
     override fun bindView(@NonNull v: MainView){
         super.bindView(v)
+        if(!isInitialNavigationPerformed) {
+            RxBus.publish(RxEvent.NavigateEvent(model.current().filesNode, processed = {
+                isInitialNavigationPerformed = true
+                RxBus.publish(RxEvent.FilesDisplayModeChangedEvent(filesDisplayMode))
+                RxBus.publish(RxEvent.FilesOrderModeChangedEvent(filesOrderMode))
+            }))
+        }
         view!!.setToolBarTitle(model.currentToolBarTitle)
         view!!.setCheckedDrawerMenuItem(model.currentDrawerMenuItemId)
         view!!.setFilesOrderModeButton(filesOrderMode)
