@@ -1,4 +1,4 @@
-# FileManager
+# NiceFileManager
 
 Simple and fast application for the files management. Works from Android API 21 and above.
 
