@@ -25,7 +25,10 @@ open class InputFileNameDialogPresenter(file: AbstractStorageFile) : BasePresent
             currentIOErrorType = IOErrorType.EMPTY_FILE_NAME
             updateView()
         }
-        else if(!isIOError && isFileNameChanged(inputFileName)){
+        else if(!isFileNameChanged(inputFileName)){
+            view?.dismiss()
+        }
+        else if(!isIOError){
             if(model.contains(inputFileName)){
                 isIOError = true
                 currentIOErrorType = IOErrorType.FILE_ALREADY_EXISTS

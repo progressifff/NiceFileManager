@@ -131,11 +131,8 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
                                       onProcessNewFile: ((file: AbstractStorageFile) -> Unit)?,
                                       onError: ((file: AbstractStorageFile, messageId: Int) -> OnErrorAction)?,
                                       existingFileAction: ExistingFileAction): Completable {
-
         var destPath = dest
-
         var filesRelativePathBase = source.parent
-
         return Completable.create {singleEmitter ->
 
             when {
@@ -143,9 +140,8 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
                 (source.path == StorageFile(destPath).path) -> onError?.invoke(StorageFile(destPath), R.string.destination_folder_is_subfolder_of_source)
                 else -> {
                     try {
-
+                        var start = System.currentTimeMillis()
                         var overallBytesCopied = 0L
-
                         //walk throw a directory
                         source.walkTopDown().forEach { currentFile ->
 
@@ -198,11 +194,10 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
 
                                     currentFile.inputStream().use { input ->
                                         destFile.outputStream().use { output ->
-                                            var start = System.currentTimeMillis()
                                             input.copyTo(output, { bytesCopied ->
                                                 run {
                                                     val current = System.currentTimeMillis()
-                                                    if((current - start) > 600) {
+                                                    if((current - start) > 1000) {
                                                         start = current
                                                         onProgressChanged?.invoke(overallBytesCopied + bytesCopied)
                                                     }
@@ -235,16 +230,15 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
 
     private fun getUniqueFile(file: File): File {
         val fileName = file.name
-        val extensionIndex = file.name.lastIndexOf(".")
+        val extensionIndex = if(file.isDirectory) -1 else file.name.lastIndexOf(".")
         val fileExtension = if(extensionIndex != -1) fileName.substring(extensionIndex) else ""
+        val fileNameWithoutExtension = if(file.isDirectory) file.name else file.nameWithoutExtension
         var i = 0
-
         var resultFile: File
         do{
-            resultFile = File(file.parent, file.nameWithoutExtension + "_Copy($i)" + fileExtension)
+            resultFile = File(file.parent, fileNameWithoutExtension + "_Copy($i)" + fileExtension)
             i++
         }while(resultFile.exists())
-
         return resultFile
     }
 

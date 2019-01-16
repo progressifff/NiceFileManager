@@ -48,6 +48,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layoutAnimation="@anim/files_list_layout_animation"
+            android:paddingBottom="42dp"
+            android:clipToPadding="false"
             android:scrollbars="vertical"
             app:fastScrollEnabled="true"
             app:fastScrollHorizontalThumbDrawable="@drawable/fast_scroll_indicator"

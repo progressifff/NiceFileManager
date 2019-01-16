@@ -19,18 +19,20 @@ import io.reactivex.schedulers.Schedulers
 import java.lang.ref.WeakReference
 import android.provider.MediaStore
 import android.widget.ImageView
+import io.reactivex.disposables.Disposable
 import java.lang.Exception
 import java.util.concurrent.Executors
 
 interface FileImageLoader {
     fun applyFileImage(file: AbstractStorageFile, fileListEntryView: WeakReference<ImageView>)
+    fun release()
 }
 
 object FileImageManager : FileImageLoader, ComponentCallbacks2 {
     private var cache: LruCache<AbstractStorageFile, Drawable>
-    private val executor = Executors.newFixedThreadPool(6)!!
+    private val executor = Executors.newFixedThreadPool(4)!!
     private val pooledScheduler = Schedulers.from(executor)
-
+    private val loadImageDisposables = arrayListOf<Disposable>()
     init {
         val activityManager = App.get().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val appMemoryLimit = activityManager.memoryClass * 1024 //kb
@@ -92,7 +94,6 @@ object FileImageManager : FileImageLoader, ComponentCallbacks2 {
     }
 
     override fun applyFileImage(file: AbstractStorageFile, fileListEntryView: WeakReference<ImageView>){
-
         if(file.isDirectory){
             fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_folder))
         }
@@ -122,24 +123,32 @@ object FileImageManager : FileImageLoader, ComponentCallbacks2 {
                         fileListEntryView.get()?.setImageDrawable(image)
                     } else {
                         fileListEntryView.get()?.setImageDrawable(ContextCompat.getDrawable(App.get(), R.drawable.ic_file))
-
                         fileListEntryView.get()?.tag = file
-                        loadFileDynamicImage(file).subscribeWith(object : DisposableSingleObserver<Drawable>() {
+                        val disposable = loadFileDynamicImage(file).subscribeWith(object : DisposableSingleObserver<Drawable>() {
                             override fun onSuccess(image: Drawable) {
+                                loadImageDisposables.remove(this)
                                 cache.put(file, image)
                                 if (fileListEntryView.get()?.tag == file) {
                                     fileListEntryView.get()?.setImageDrawable(image)
                                 }
                             }
-
                             override fun onError(e: Throwable) {
+                                loadImageDisposables.remove(this)
                                 e.printStackTrace()
                             }
                         })
+                        loadImageDisposables.add(disposable)
                     }
                 }
             }
         }
+    }
+
+    override fun release(){
+        for(disposable in loadImageDisposables){
+            disposable.dispose()
+        }
+        loadImageDisposables.clear()
     }
 
     override fun onLowMemory() {}

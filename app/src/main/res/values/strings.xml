@@ -71,12 +71,12 @@
     <string name="tasks">tasks</string>
     <string name="task">task</string>
     <string name="calculating_files_size">Calculating files size…</string>
-    <string name="destination_has_such_files">"The destination already has such files"</string>
+    <string name="destination_has_such_files">The destination already has such files names</string>
     <string name="delete_file_question">Delete file?</string>
     <string name="delete_files_question">Delete files?</string>
     <string name="quit_application_msg">Quit the application?</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="save_both_action">Save both</string>
+    <string name="save_both_action">Save both files</string>
     <string name="skip_action">Skip</string>
     <string name="rewrite_action">Rewrite</string>
     <string name="calculate_file_size_error">Failed to calculate file size</string>

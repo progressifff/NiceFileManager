@@ -35,8 +35,6 @@
             app:fastScrollVerticalTrackDrawable="@drawable/fast_scroll_line"
             />
 
-
-
         <ProgressBar
             android:id="@+id/loadFilesProgressBar"
             style="@style/Widget.AppCompat.ProgressBar"

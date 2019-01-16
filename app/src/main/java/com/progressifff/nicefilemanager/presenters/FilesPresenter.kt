@@ -42,7 +42,7 @@ class FilesPresenter(private val appPreferences: Preferences,
         }
 
         override fun onUpdated() {
-            view?.update(true, true)
+            view?.update(true)
         }
 
         override fun onError(messageId: Int) {
@@ -257,6 +257,7 @@ class FilesPresenter(private val appPreferences: Preferences,
     }
 
     private fun changeModel(node: AbstractFilesNode){
+        fileImageLoader.release()
         if(!::model.isInitialized){
             model = node
             model.subscribe(fileNodeEventsListener)

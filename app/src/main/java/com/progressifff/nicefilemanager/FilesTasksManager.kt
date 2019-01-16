@@ -8,13 +8,9 @@ import java.lang.Exception
 import java.util.concurrent.atomic.AtomicReference
 
 object FilesTasksManager {
-
     private val tasks = arrayListOf<AbstractTask>()
-
     private val tasksIndicesMap = hashMapOf<Int, Int>()
-
     val tasksCount: Int get() = tasks.size
-
     var eventsListener: EventsListener? = null
 
     private val taskListener = object: AbstractTask.TaskListener {
@@ -59,20 +55,16 @@ object FilesTasksManager {
     }
 
     fun add(task: AbstractTask){
-
         if(task.files.isEmpty()) {
             return
         }
-
         task.listener = taskListener
-
         val executeTask: () -> Unit = {
             tasks.add(task)
             tasksIndicesMap[task.id] = tasks.size - 1
             eventsListener?.onNewTask()
             task.execute()
         }
-
         if(task is CopyCutTask){
 
             if(task.destFolder.path == task.files.first().parent!!.path){
@@ -115,7 +107,6 @@ object FilesTasksManager {
 }
 
 abstract class AbstractTask(val files: List<AbstractStorageFile>){
-
     val id: Int get() = hashCode()
     var currentProcessingFile = AtomicReference<String>("")
     var progress = AtomicReference(0)
@@ -201,18 +192,12 @@ class CopyTask(files: List<AbstractStorageFile>,
                existingFileAction: AbstractStorageFile.ExistingFileAction = AbstractStorageFile.ExistingFileAction.REWRITE) : CopyCutTask(files, destFolder, existingFileAction){
 
     override fun execute() {
-
         if(files.isNotEmpty()){
-
             var task = calculateFilesSizeTask
-
             val it = files.iterator()
-
             var bytesCopied = 0L
-
             do{
                 var prev = 0L
-
                 val currentTask = it.next().copyRecursivelyAsync(destFolder.path,
                         { bytes ->
                             bytesCopied += (bytes - prev)
@@ -226,11 +211,8 @@ class CopyTask(files: List<AbstractStorageFile>,
                         },
                         existingFileAction
                 )
-
                 task = task.concatWith(currentTask)
-
             } while (it.hasNext())
-
             subscribe(task)
         }
     }
@@ -244,7 +226,6 @@ class CutTask(files: List<AbstractStorageFile>,
         if(files.isEmpty()){
             return
         }
-
         val task = calculateFilesSizeTask.concatWith(Completable.create { emitter ->
             var bytesProcessed = 0L
             val it = files.iterator()
@@ -260,7 +241,6 @@ class CutTask(files: List<AbstractStorageFile>,
                 bytesProcessed += currentFile.size
                 updateProgress(bytesProcessed)
             } while (it.hasNext())
-
             emitter.onComplete()
         })
         subscribe(task)
@@ -268,24 +248,16 @@ class CutTask(files: List<AbstractStorageFile>,
 }
 
 class DeleteTask(files: List<AbstractStorageFile>) : AbstractTask(files){
-
     override val processingFilesCount get() = files.count()
-
     override fun execute() {
         if(files.isEmpty()){
             return
         }
-
         var task = calculateFilesSizeTask
-
         val it = files.iterator()
-
         var bytesProcessed = 0L
-
         do{
-
             var prev = 0L
-
             val currentTask = it.next().deleteRecursivelyAsync(
                                                                 {   bytes ->
                                                                     bytesProcessed += (bytes - prev)
@@ -298,9 +270,7 @@ class DeleteTask(files: List<AbstractStorageFile>) : AbstractTask(files){
                                                                 }
                                                               )
             task = task.concatWith(currentTask)
-
         } while (it.hasNext())
-
         subscribe(task)
     }
 }

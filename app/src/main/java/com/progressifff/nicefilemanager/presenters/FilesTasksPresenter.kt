@@ -7,13 +7,9 @@ import com.progressifff.nicefilemanager.views.FilesTasksView
 import io.reactivex.disposables.Disposable
 
 class FilesTasksPresenter : BasePresenter<FilesTasksManager, FilesTasksView>(){
-
     override var model = FilesTasksManager
-
     val tasksCount: Int get() = model.tasksCount
-
     private lateinit var newFilesTaskEventListenerDisposable: Disposable
-
     private val filesTasksStatusListener = object: FilesTasksManager.EventsListener {
 
         override fun onNewTask() {
