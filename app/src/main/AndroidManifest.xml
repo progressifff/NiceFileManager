@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.progressifff.filemanager">
+          package="com.progressifff.nicefilemanager">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
     <application
-        android:name=".App"
+        android:name="com.progressifff.nicefilemanager.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         >
         <activity
-            android:name=".SplashActivity"
+            android:name="com.progressifff.nicefilemanager.SplashActivity"
             android:noHistory="true"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -25,20 +25,20 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".PermissionActivity"/>
+        <activity android:name="com.progressifff.nicefilemanager.PermissionActivity"/>
 
-        <activity android:name=".MainActivity"/>
+        <activity android:name="com.progressifff.nicefilemanager.MainActivity"/>
 
         <activity
-            android:name=".SearchableActivity"
+            android:name="com.progressifff.nicefilemanager.SearchableActivity"
             android:launchMode="singleTop"/>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.progressifff.nicefilemanager.SettingsActivity"
             android:label="@string/title_activity_settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.progressifff.nicefilemanager.MainActivity" />
         </activity>
 
         <provider

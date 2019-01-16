@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">File Manager</string>
+    <string name="app_name" translatable="false">Nice File Manager</string>
     <string name="search_hint">Search file</string>
     <string name="no_storage_access">Cannot access files.</string>
     <string name="storage_permissions_rationale">Cannot access files.\nFileManager needs the storage permissions to access files.</string>

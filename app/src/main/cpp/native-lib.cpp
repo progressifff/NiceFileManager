@@ -21,7 +21,7 @@ static int32_t processFile(const char* path, const struct stat *statBuf, int32_t
 
 extern "C" JNIEXPORT jlong
 JNICALL
-Java_com_progressifff_filemanager_models_StorageFile_calculateDirSize(
+Java_com_progressifff_nicefilemanager_models_StorageFile_calculateDirSize(
         JNIEnv *env,
         jobject,
         jstring dirPath) {

@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Файловый менеджер</string>
     <string name="search_hint">Найти файл</string>
     <string name="no_storage_access">Не удается получить доступ к файлам.</string>
     <string name="storage_permissions_rationale">Не удается получить доступ к файлам.\nFileManager нуждается в разрешении для доступа к файлам.</string>
