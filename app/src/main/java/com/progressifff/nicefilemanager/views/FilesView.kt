@@ -32,6 +32,9 @@ interface NestedFilesView : FilesView {
     fun setFilesInGridLayout()
     fun setFilesInListLayout()
     fun invalidateMenu()
+    fun invalidateFilesList()
+    fun hideSwipeLayoutRefresher()
+    fun getFilesListState(): Parcelable?
 }
 
 interface SearchedFilesView : FilesView{

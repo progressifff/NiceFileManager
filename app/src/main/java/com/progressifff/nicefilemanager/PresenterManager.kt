@@ -6,9 +6,7 @@ import java.lang.Exception
 import java.util.concurrent.atomic.AtomicLong
 
 object PresenterManager {
-
     private var curPresenterId: AtomicLong = AtomicLong()
-
     private var presenters = LongSparseArray<BasePresenter<*, *>>()
 
     @Suppress("UNCHECKED_CAST")
@@ -28,5 +26,5 @@ object PresenterManager {
         outState.putLong(presenterKey, presenterId)
     }
 
-    const val PRESENTER_ID: String = "presenter_id"
+    private const val PRESENTER_ID: String = "PresenterId"
 }

@@ -66,7 +66,6 @@ object FilesTasksManager {
             task.execute()
         }
         if(task is CopyCutTask){
-
             if(task.destFolder.path == task.files.first().parent!!.path){
                 if(task is CutTask) {
                     eventsListener?.onError(R.string.cut_to_same_folder)
@@ -77,20 +76,16 @@ object FilesTasksManager {
                 }
             }
             else{
-
                 if(task.existingFilesNames.isNotEmpty()){
-
                     val callback: (action: AbstractStorageFile.ExistingFileAction) -> Unit = { action ->
                         task.existingFileAction = action
                         executeTask()
                     }
-
                     eventsListener?.onProcessingExistingFiles(callback, task.existingFilesNames)
                     return
                 }
             }
         }
-
         executeTask()
     }
 

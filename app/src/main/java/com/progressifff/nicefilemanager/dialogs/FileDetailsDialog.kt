@@ -87,7 +87,7 @@ class FileDetailsDialog : DialogFragment() {
     }
 
     companion object {
-        private const val FILE_KEY = "FileKey"
+        private const val FILE_KEY = "DetailsDialogFile"
 
         fun createInstance(file: AbstractStorageFile): FileDetailsDialog{
             val dialog = FileDetailsDialog()

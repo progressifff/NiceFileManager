@@ -73,15 +73,12 @@ abstract class AbstractFilesNode(val folder: AbstractStorageFile) {
     }
 
     fun load() {
-
         if(::loadFilesDisposable.isInitialized && !loadFilesDisposable.isDisposed){
             loadFilesDisposable.dispose()
         }
-
         for(observer in eventsListeners){
             observer.onStartUpdate()
         }
-
         val filesSource = folder.openAsDir()
         loadFilesDisposable = filesSource.flatMap { data -> //Reorder: at first folders, then files
             Single.create<ArrayList<AbstractStorageFile>>{
@@ -92,11 +89,9 @@ abstract class AbstractFilesNode(val folder: AbstractStorageFile) {
                     if(it.isDisposed) {
                         return@create
                     }
-
                     if(!check(file)) {
                         continue
                     }
-
                     if(!file.isDirectory){
                         files.add(file)
                     }
@@ -106,7 +101,6 @@ abstract class AbstractFilesNode(val folder: AbstractStorageFile) {
                 }
                 result.addAll(folders)
                 result.addAll(files)
-
                 if(!it.isDisposed) {
                     it.onSuccess(result)
                 }
@@ -117,7 +111,6 @@ abstract class AbstractFilesNode(val folder: AbstractStorageFile) {
             override fun onSuccess(files: ArrayList<AbstractStorageFile>) {
                 this@AbstractFilesNode.files = files
                 isLoaded = true
-
                 for(observer in eventsListeners){
                     observer.onUpdated()
                 }
@@ -237,7 +230,6 @@ abstract class AbstractFilesNode(val folder: AbstractStorageFile) {
     }
 
     interface EventsListener{
-        fun onFileChanged(index: Int)
         fun onFileRemoved(index: Int)
         fun onFileCreated(index: Int)
         fun onUpdated()

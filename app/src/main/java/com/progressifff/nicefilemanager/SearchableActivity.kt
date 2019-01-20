@@ -10,7 +10,10 @@ import android.support.v7.widget.RecyclerView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.Toast
-import com.progressifff.nicefilemanager.Constants.RESULT_SEARCHED_FOLDER_OPEN
+import com.progressifff.nicefilemanager.Constants.RESULT_FOLDER_KEY
+import com.progressifff.nicefilemanager.Constants.RESULT_SEARCHED_FOLDER_OPEN_CODE
+import com.progressifff.nicefilemanager.Constants.SEARCH_QUERY_KEY
+import com.progressifff.nicefilemanager.Constants.SEARCH_ROOT_FOLDER_KEY
 import com.progressifff.nicefilemanager.Constants.USE_DARK_THEME_KEY
 import com.progressifff.nicefilemanager.dialogs.DeleteFilesDialog
 import com.progressifff.nicefilemanager.dialogs.FileActionsDialog
@@ -72,7 +75,7 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
 
         val folder = intent.getParcelableExtra<AbstractStorageFile>(SEARCH_ROOT_FOLDER_KEY)
         presenter = if(savedInstanceState == null){
-            query = intent.getStringExtra(SEARCH_QUERY)
+            query = intent.getStringExtra(SEARCH_QUERY_KEY)
             searchView.setQueryText(query!!)
             //Save search suggestions
             saveSuggestion(query!!)
@@ -226,8 +229,8 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
 
     override fun openFolder(folder: AbstractStorageFile) {
         val resultIntent = Intent()
-        resultIntent.putExtra(RESULT_FOLDER, folder)
-        this.setResult(RESULT_SEARCHED_FOLDER_OPEN, resultIntent)
+        resultIntent.putExtra(RESULT_FOLDER_KEY, folder)
+        this.setResult(RESULT_SEARCHED_FOLDER_OPEN_CODE, resultIntent)
         finish()
     }
 
@@ -257,11 +260,5 @@ class SearchableActivity : AppCompatActivity(), SearchedFilesView {
 
     override fun showDeleteFilesDialog(filesCount: Int) {
         DeleteFilesDialog.createInstance(filesCount).show(supportFragmentManager, DeleteFilesDialog::class.java.name)
-    }
-
-    companion object {
-        const val SEARCH_ROOT_FOLDER_KEY = "SearchRootFolder"
-        const val SEARCH_QUERY = "SearchQuery"
-        const val RESULT_FOLDER = "ResultFolder"
     }
 }

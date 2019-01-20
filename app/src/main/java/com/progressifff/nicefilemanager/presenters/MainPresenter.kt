@@ -100,6 +100,16 @@ class MainPresenter(private var appPreferences: Preferences, private var eventBu
         if(previous != null && previous.filesNode == event.filesNode){
             previous.filesListState = event.filesListState
         }
+        else{
+            var i = model.navigationEntriesCount - 1
+            while(i >= 0){
+                val navEntry = model.get(i)
+                if(navEntry.filesNode == event.filesNode){
+                    navEntry.filesListState = event.filesListState
+                }
+                i--
+            }
+        }
     }
 
     fun onOpenSearchedFolder(folder: AbstractStorageFile){
@@ -219,7 +229,6 @@ class MainPresenter(private var appPreferences: Preferences, private var eventBu
 
     private fun navigateBack(): Boolean{
         val navEntry = model.navigateBack()
-
         return if(navEntry != null){
             view!!.updateNavigationBar()
             view!!.setCheckedDrawerMenuItem(model.currentDrawerMenuItemId)
@@ -237,7 +246,6 @@ class MainPresenter(private var appPreferences: Preferences, private var eventBu
     enum class FilesDisplayMode{
         LIST,
         GRID;
-
         companion object {
             fun fromString(name: String): FilesDisplayMode{
                 return try{
@@ -253,7 +261,6 @@ class MainPresenter(private var appPreferences: Preferences, private var eventBu
     enum class FilesOrderMode{
         ASCENDING,
         DESCENDING;
-
         companion object {
             fun fromString(name: String): FilesOrderMode{
                 return try{

@@ -24,9 +24,7 @@ class FilesTasks(@IdRes val viewId: Int) : FilesTasksView{
     private lateinit var activity: FragmentActivity
 
     fun onActivityCreate(activity: FragmentActivity, savedInstanceState: Bundle?){
-
         this.activity = activity
-
         presenter = if(savedInstanceState == null){
             FilesTasksPresenter()
         }
@@ -37,34 +35,22 @@ class FilesTasks(@IdRes val viewId: Int) : FilesTasksView{
                 e.printStackTrace()
                 FilesTasksPresenter()
             }
-
-
         filesTasksTitle = activity.findViewById(R.id.filesTasksTitle)
-
         updateFilesTasksTitle()
-
         val tasksView = activity.findViewById<LinearLayout>(viewId)
-
         filesTasksViewBehavior = tasksView.bottomSheetBehavior()
-
         if(presenter.tasksCount == 0){
             hideFilesTaskView()
         }
-
         filesTasksListLayoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-
         filesTasksListAdapter = FilesTasksListAdapter(presenter)
-
         filesTasksList = activity.findViewById(R.id.filesTasksList)
-
         filesTasksList.apply {
             adapter = filesTasksListAdapter
             layoutManager = filesTasksListLayoutManager
             setHasFixedSize(true)
         }
-
         (filesTasksList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-
     }
 
     fun onActivityStart(){

@@ -80,7 +80,6 @@ class FilesFragment : Fragment(), NestedFilesView {
                 filesListRefresher.isEnabled = (recyclerView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0
             }
         })
-
         val filesDisplayMode = MainPresenter.FilesDisplayMode.fromString(AppPreferences.getString(Constants.FILES_DISPLAY_MODE_KEY, MainPresenter.FilesDisplayMode.LIST.name))
         when(filesDisplayMode){
             MainPresenter.FilesDisplayMode.LIST -> filesList.layoutManager = filesListLinearLayoutManager
@@ -89,7 +88,6 @@ class FilesFragment : Fragment(), NestedFilesView {
                 filesList.addItemDecoration(filesListGridLayoutDecoration)
             }
         }
-
         filesList.runOnLayoutChanged { setupToolBarScrollingBehavior(filesList.isScrollable) }
     }
 
@@ -197,7 +195,6 @@ class FilesFragment : Fragment(), NestedFilesView {
         if(resetListScrollPosition){
             filesList.scrollToPosition(0)
         }
-
         if(presenter.getFilesCount() == 0){
             showNoFilesMsg()
         }
@@ -209,14 +206,8 @@ class FilesFragment : Fragment(), NestedFilesView {
                 filesList.scheduleLayoutAnimation()
             }
         }
-
         filesListAdapter.notifyDataSetChanged()
-
         filesList.runOnLayoutChanged { setupToolBarScrollingBehavior(!presenter.multiSelectMode.running && filesList.isScrollable) }
-
-        if(filesListRefresher.isRefreshing){
-            App.get().handler.postDelayed({ filesListRefresher.isRefreshing = false }, 100)
-        }
     }
 
     override fun showFileDetailsDialog(file: AbstractStorageFile) {
@@ -238,7 +229,7 @@ class FilesFragment : Fragment(), NestedFilesView {
     }
 
     override fun showSortTypeDialog(sortType: AbstractFilesNode.SortFilesType) {
-        SortTypeDialog.createInstance(sortType).show(childFragmentManager, SortTypeDialog.DIALOG_KEY)
+        SortTypeDialog.createInstance(sortType).show(childFragmentManager, SortTypeDialog::class.java.name)
     }
 
     override fun showRenameFileDialog(file: AbstractStorageFile) {
@@ -247,6 +238,10 @@ class FilesFragment : Fragment(), NestedFilesView {
 
     override fun showFileActionsDialog(file: AbstractStorageFile) {
         FileActionsDialog.createInstance(file).show(childFragmentManager, FileActionsDialog::class.java.name)
+    }
+
+    override fun invalidateFilesList() {
+        filesListAdapter.notifyDataSetChanged()
     }
 
     override fun updateFilesListEntry(index: Int) = filesListAdapter.notifyItemChanged(index)
@@ -270,6 +265,14 @@ class FilesFragment : Fragment(), NestedFilesView {
             filesList.runOnLayoutChanged { setupToolBarScrollingBehavior(filesList.isScrollable) }
         }
     }
+
+    override fun hideSwipeLayoutRefresher() {
+        if(filesListRefresher.isRefreshing){
+            App.get().handler.postDelayed({ filesListRefresher.isRefreshing = false }, 100)
+        }
+    }
+
+    override fun getFilesListState(): Parcelable? = (filesList.layoutManager as LinearLayoutManager).onSaveInstanceState()
 
     override fun showToast(@StringRes messageId: Int) {
         Toast.makeText(context, getString(messageId), Toast.LENGTH_SHORT).show()

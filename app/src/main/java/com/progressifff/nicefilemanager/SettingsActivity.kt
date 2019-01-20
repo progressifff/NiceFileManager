@@ -7,7 +7,7 @@ import android.support.v7.preference.PreferenceFragmentCompat
 import android.content.pm.PackageManager
 import android.support.v7.preference.PreferenceScreen
 import android.support.v7.widget.Toolbar
-import com.progressifff.nicefilemanager.Constants.RESULT_THEME_CHANGED
+import com.progressifff.nicefilemanager.Constants.RESULT_THEME_CHANGED_CODE
 import com.progressifff.nicefilemanager.Constants.USE_DARK_THEME_KEY
 
 class SettingsActivity : AppCompatActivity() {
@@ -46,7 +46,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun setActivityResult(){
         if(intent.getBooleanExtra(USE_DARK_THEME_KEY, false) != AppPreferences.getBoolean(USE_DARK_THEME_KEY)) {
-            setResult(RESULT_THEME_CHANGED)
+            setResult(RESULT_THEME_CHANGED_CODE)
         }
         else{
             setResult(Activity.RESULT_OK)

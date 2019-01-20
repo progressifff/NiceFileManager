@@ -15,7 +15,6 @@ class RenameStorageFileDialog : InputFileNameDialog() {
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         file = arguments!!.getParcelable(FILE_TO_RENAME_KEY)!!
-
         presenter = if(savedInstanceState == null){
             RenameStorageFileDialogPresenter(file.name, file.parent!!)
         }
@@ -26,7 +25,6 @@ class RenameStorageFileDialog : InputFileNameDialog() {
             e.printStackTrace()
             RenameStorageFileDialogPresenter(file.name, file.parent!!)
         }
-
         return buildDialog(context!!.getString(R.string.rename_dialog_title), file.isDirectory, file.name)
     }
 
@@ -43,7 +41,7 @@ class RenameStorageFileDialog : InputFileNameDialog() {
     }
 
     companion object {
-        private const val FILE_TO_RENAME_KEY = "FileToRenameKey"
+        private const val FILE_TO_RENAME_KEY = "FileToRename"
 
         fun createInstance(storageFile: AbstractStorageFile): RenameStorageFileDialog {
             val dialog = RenameStorageFileDialog()

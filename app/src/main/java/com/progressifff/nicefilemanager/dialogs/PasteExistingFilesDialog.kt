@@ -67,7 +67,7 @@ class PasteExistingFilesDialog : BottomSheetDialogFragment(), View.OnClickListen
     }
 
     companion object {
-        private const val EXISTING_FILES_NAMES_KEY = "ExistingFilesNamesKey"
+        private const val EXISTING_FILES_NAMES_KEY = "ExistingFilesNames"
 
         fun createInstance(filesNames: ArrayList<String>): PasteExistingFilesDialog{
             val dialog = PasteExistingFilesDialog()

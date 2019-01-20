@@ -17,7 +17,7 @@ import java.lang.AssertionError
 object Utils{
     fun showOpenFileDialog(context: Context, file: AbstractStorageFile){
         if(file.isDirectory){
-            Toast.makeText(context, context.getString(R.string.open_file_error), Toast.LENGTH_SHORT).show()
+            throw AssertionError("Failed to open file. File is directory")
         }
         val mimeType = file.mimeType
         val apkMimeType = "application/vnd.android.package-archive"
@@ -26,7 +26,6 @@ object Utils{
         intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
         val uri = FileUriProvider.getUri(file)
         intent.setDataAndType(uri, mimeType)
-
         if (intent.resolveActivity(context.packageManager) != null) {
             context.startActivity(intent)
         }
@@ -36,7 +35,9 @@ object Utils{
     }
 
     fun showShareFileDialog(context: Context, file: AbstractStorageFile){
-        assert(!file.isDirectory)
+        if(file.isDirectory){
+            throw AssertionError("Failed to share file. File is directory")
+        }
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_STREAM, FileUriProvider.getUri(file))
@@ -49,36 +50,27 @@ object Utils{
         val resources = App.get().resources
         val fileCardWidth = resources.getDimensionPixelSize(R.dimen.file_card_width)
         val filesGridItemMinSpacing = resources.getDimensionPixelSize(R.dimen.files_grid_item_min_spacing)
-
         val windowManger = App.get().getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val size = Point()
         windowManger.defaultDisplay.getSize(size)
-
         var columnsCount = size.x / fileCardWidth
-
         if((columnsCount < 1)) {
             throw AssertionError("Null columns count")
         }
-
         if(columnsCount > 1){
             val spacing = (size.x % fileCardWidth) / columnsCount / 2
             if(spacing < filesGridItemMinSpacing){
                 columnsCount -= 1
             }
         }
-
         return columnsCount
     }
 }
 
 fun Int.toDp(): Int = (this / Resources.getSystem().displayMetrics.density).toInt()
-
 fun Int.toPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
-
 fun Long.toGB(): Float = this.toFloat() / 1073741824
-
 fun Long.toMB(): Float = this.toFloat() / 1048576
-
 fun Long.toKB(): Float = this.toFloat() / 1024
 
 fun InputStream.copyTo(out: OutputStream, onProgressChanged: (bytesCopied: Long) -> Unit, isCanceled: () -> Boolean): Long {

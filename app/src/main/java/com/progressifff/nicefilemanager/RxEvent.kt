@@ -8,7 +8,7 @@ class RxEvent {
 
     data class NavigateEvent(val filesNode: AbstractFilesNode, val filesListState: Parcelable? = null, var processed: () -> Unit = {})
 
-    data class SaveFilesStateEvent(val filesNode: AbstractFilesNode, val filesListState: Parcelable)
+    data class SaveFilesStateEvent(val filesNode: AbstractFilesNode, val filesListState: Parcelable?)
 
     data class OpenFolderEvent(val filesNode: AbstractFilesNode)
 

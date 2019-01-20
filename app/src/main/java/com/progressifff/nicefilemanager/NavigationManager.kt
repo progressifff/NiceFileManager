@@ -45,7 +45,6 @@ class NavigationManager {
             navigationEntries.last()
 
         } else {
-
             if (navigationEntries.size <= 1) {
                 return if(statesStack.isNotEmpty()){
                     val lastState = statesStack.pop()

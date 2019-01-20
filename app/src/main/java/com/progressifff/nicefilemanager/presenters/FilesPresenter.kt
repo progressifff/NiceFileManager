@@ -24,30 +24,23 @@ class FilesPresenter(private val appPreferences: Preferences,
     override lateinit var model: AbstractFilesNode
 
     private val fileNodeEventsListener = object: AbstractFilesNode.EventsListener{
-
         override fun onStartUpdate() {
             view?.showProgressBar()
         }
-
-        override fun onFileChanged(index: Int) {
-            view?.updateFilesListEntry(index)
-        }
-
         override fun onFileRemoved(index: Int) {
             view?.removeFilesListEntry(index)
         }
-
         override fun onFileCreated(index: Int) {
             view?.insertFilesListEntry(index)
         }
-
         override fun onUpdated() {
-            view?.update(true)
+            view?.update(true, true)
+            view?.hideSwipeLayoutRefresher()
         }
-
         override fun onError(messageId: Int) {
             view?.showToast(messageId)
             view?.showNoFilesMsg()
+            view?.hideSwipeLayoutRefresher()
         }
     }
 
@@ -94,7 +87,7 @@ class FilesPresenter(private val appPreferences: Preferences,
 
         sortTypeEventListenerDisposable = eventBus.listen(
                 RxEvent.FilesSortTypeChangedEvent::class.java).
-                subscribe(::filesSortTypeChangedEvent)
+                subscribe(::onFilesSortTypeChangedEvent)
 
         view!!.update(false)
     }
@@ -119,7 +112,6 @@ class FilesPresenter(private val appPreferences: Preferences,
         if(multiSelectMode.running) {
             multiSelectMode.cancel()
         }
-
         if(!::model.isInitialized){
             changeModel(event.filesNode)
             model.load()
@@ -131,17 +123,18 @@ class FilesPresenter(private val appPreferences: Preferences,
             val isModelUpdateRequired = (event.filesNode is FilesNode && model is FilesNode) &&
                                         (event.filesNode.includeHiddenFiles != (model as FilesNode).includeHiddenFiles)
 
+            val files = ArrayList<AbstractStorageFile>(model.files)
+            model.files.clear()
+            view?.invalidateFilesList()
+            model.files.addAll(files)
+
+            val s = view?.getFilesListState()
+            eventBus.publish(RxEvent.SaveFilesStateEvent(model, s))
             changeModel(event.filesNode)
 
-            if(!model.isLoaded || isModelUpdateRequired){
-                model.load()
-            }
-            else if(isModelSortRequired){
-                model.sort()
-            }
-            else{
-                view?.update()
-            }
+            if(!model.isLoaded || isModelUpdateRequired) model.load()
+            else if(isModelSortRequired) model.sort()
+            else view?.update()
         }
 
         view?.restoreFilesListState(event.filesListState)
@@ -166,7 +159,7 @@ class FilesPresenter(private val appPreferences: Preferences,
         }
     }
 
-    private fun filesSortTypeChangedEvent(event: RxEvent.FilesSortTypeChangedEvent){
+    private fun onFilesSortTypeChangedEvent(event: RxEvent.FilesSortTypeChangedEvent){
         model.sortFilesType = event.sortType
         appPreferences.saveString(Constants.SORT_TYPE_KEY, event.sortType.name)
     }
@@ -178,7 +171,6 @@ class FilesPresenter(private val appPreferences: Preferences,
     override fun onFilesListEntryClicked(index: Int, filesListState: Parcelable) {
         try{
             val file = model.get(index)
-
             if(!multiSelectMode.running){
                 if(file.isDirectory){
                     val filesNode = AbstractFilesNode.create(file)
@@ -207,7 +199,12 @@ class FilesPresenter(private val appPreferences: Preferences,
     }
 
     override fun onFileListEntryMenuClicked(index: Int){
-        view!!.showFileActionsDialog(getFile(index))
+        try{
+            view!!.showFileActionsDialog(getFile(index))
+        }
+        catch (e: Exception){
+            e.printStackTrace()
+        }
     }
 
     override fun onActionModeDestroyed() {
@@ -257,7 +254,7 @@ class FilesPresenter(private val appPreferences: Preferences,
     }
 
     private fun changeModel(node: AbstractFilesNode){
-        fileImageLoader.release()
+        fileImageLoader.discard()
         if(!::model.isInitialized){
             model = node
             model.subscribe(fileNodeEventsListener)

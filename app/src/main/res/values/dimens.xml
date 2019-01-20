@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <dimen name="files_grid_item_min_spacing">2dp</dimen>
-    <dimen name="file_card_width">92dp</dimen>
+    <dimen name="files_grid_item_min_spacing">1dp</dimen>
+    <dimen name="file_card_width">88dp</dimen>
     <dimen name="file_card_height">120dp</dimen>
 </resources>

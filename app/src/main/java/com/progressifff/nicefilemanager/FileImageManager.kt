@@ -25,7 +25,7 @@ import java.util.concurrent.Executors
 
 interface FileImageLoader {
     fun applyFileImage(file: AbstractStorageFile, fileListEntryView: WeakReference<ImageView>)
-    fun release()
+    fun discard()
 }
 
 object FileImageManager : FileImageLoader, ComponentCallbacks2 {
@@ -144,7 +144,7 @@ object FileImageManager : FileImageLoader, ComponentCallbacks2 {
         }
     }
 
-    override fun release(){
+    override fun discard(){
         for(disposable in loadImageDisposables){
             disposable.dispose()
         }

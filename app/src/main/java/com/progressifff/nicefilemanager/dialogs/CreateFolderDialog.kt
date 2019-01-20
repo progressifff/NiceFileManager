@@ -41,7 +41,7 @@ class CreateFolderDialog : InputFileNameDialog() {
     }
 
     companion object {
-        private const val PARENT_STORAGE_FILE_KEY = "parentStorageFileKey"
+        private const val PARENT_STORAGE_FILE_KEY = "ParentStorageFile"
 
         fun createInstance(parentFolder: AbstractStorageFile): CreateFolderDialog{
             val dialog = CreateFolderDialog()

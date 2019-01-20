@@ -17,10 +17,10 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageButton
-import com.progressifff.nicefilemanager.Constants.RESULT_SEARCHED_FOLDER_OPEN
+import com.progressifff.nicefilemanager.Constants.RESULT_SEARCHED_FOLDER_OPEN_CODE
 import com.progressifff.nicefilemanager.Constants.SEARCH_ACTIVITY_REQUEST_CODE
 import com.progressifff.nicefilemanager.Constants.SETTINGS_ACTIVITY_REQUEST_CODE
-import com.progressifff.nicefilemanager.Constants.RESULT_THEME_CHANGED
+import com.progressifff.nicefilemanager.Constants.RESULT_THEME_CHANGED_CODE
 import com.progressifff.nicefilemanager.Constants.USE_DARK_THEME_KEY
 import com.progressifff.nicefilemanager.presenters.MainPresenter
 import com.progressifff.nicefilemanager.views.MainView
@@ -189,8 +189,8 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun startSearchableActivity(query: String){
         val startActivityIntent = Intent(this@MainActivity, SearchableActivity::class.java)
-        startActivityIntent.putExtra(SearchableActivity.SEARCH_ROOT_FOLDER_KEY, presenter.getCurrentOpenedFolder())
-        startActivityIntent.putExtra(SearchableActivity.SEARCH_QUERY, query)
+        startActivityIntent.putExtra(Constants.SEARCH_ROOT_FOLDER_KEY, presenter.getCurrentOpenedFolder())
+        startActivityIntent.putExtra(Constants.SEARCH_QUERY_KEY, query)
         startActivityForResult(startActivityIntent, SEARCH_ACTIVITY_REQUEST_CODE)
     }
 
@@ -198,12 +198,12 @@ class MainActivity : AppCompatActivity(), MainView {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode){
             SEARCH_ACTIVITY_REQUEST_CODE -> {
-                if(resultCode == RESULT_SEARCHED_FOLDER_OPEN){
-                    presenter.onOpenSearchedFolder(data?.getParcelableExtra(SearchableActivity.RESULT_FOLDER)!!)
+                if(resultCode == RESULT_SEARCHED_FOLDER_OPEN_CODE){
+                    presenter.onOpenSearchedFolder(data?.getParcelableExtra(Constants.RESULT_FOLDER_KEY)!!)
                 }
             }
             SETTINGS_ACTIVITY_REQUEST_CODE ->{
-                if(resultCode == RESULT_THEME_CHANGED){
+                if(resultCode == RESULT_THEME_CHANGED_CODE){
                     recreate()
                 }
             }

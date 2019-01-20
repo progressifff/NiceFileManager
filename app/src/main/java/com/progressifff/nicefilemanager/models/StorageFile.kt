@@ -74,13 +74,9 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
     }
 
     constructor(filePath: String): this(File(filePath))
-
     constructor(parent: StorageFile, fileName: String): this(parent.source, fileName)
-
     constructor(parent: File, fileName: String): this(File(parent, fileName))
-
     constructor(parent: String, fileName: String): this(StorageFile(parent), fileName)
-
     constructor(parcel: Parcel) : this(parcel.readSerializable() as File)
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -123,7 +119,6 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
         if(!isRenamed){
             throw FileSystemException(source, newFile, "Failed to rename source.")
         }
-        source = newFile
     }
 
     override fun copyRecursivelyAsync(dest: String,
@@ -189,9 +184,7 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
                                     destFile.mkdirs()
 
                                 } else {
-
                                     destFile.parentFile.mkdirs()
-
                                     currentFile.inputStream().use { input ->
                                         destFile.outputStream().use { output ->
                                             input.copyTo(output, { bytesCopied ->
@@ -250,14 +243,11 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
                 var overallBytes = 0L
                 //walk throw a directory
                 source.walkBottomUp().forEach { currentFile ->
-
                     //If disposed -> cancel copying
                     if(completableEmitter.isDisposed){
                         return@create
                     }
-
                     onProcessNewFile?.invoke(StorageFile(currentFile))
-
                     if(currentFile.exists()){
                         overallBytes += currentFile.length()
                         currentFile.delete()
@@ -277,24 +267,16 @@ class StorageFile(source: File) : AbstractStorageFile(), Parcelable{
     override fun move(path: String, existingFileAction: ExistingFileAction) {
         var destFile = File(path + File.separator + source.name)
         if (destFile.exists()) {
-            when (existingFileAction) {
-                ExistingFileAction.REWRITE -> rename(destFile, true)
-
-                ExistingFileAction.SAVE_BOTH -> {
-                    destFile = getUniqueFile(destFile)
-                }
-
-                ExistingFileAction.SKIP -> return
-            }
+            if(existingFileAction == ExistingFileAction.SKIP) return
+            else if(existingFileAction == ExistingFileAction.SAVE_BOTH) destFile = getUniqueFile(destFile)
         }
-        rename(destFile)
+        rename(destFile, true)
     }
 
     override fun openAsDir(): Single<ArrayList<AbstractStorageFile>> {
         if(!source.isDirectory){
             throw AssertionError("File is not a directory")
         }
-
         return Single.create<ArrayList<AbstractStorageFile>> {
             try{
                 if(!source.isDirectory){

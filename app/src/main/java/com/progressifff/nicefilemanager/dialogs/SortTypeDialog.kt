@@ -82,7 +82,6 @@ class SortTypeDialog : BottomSheetDialogFragment(), View.OnClickListener {
     }
 
     companion object {
-        const val DIALOG_KEY = "SortTypeDialogKey"
 
         fun createInstance(sortFilesType: AbstractFilesNode.SortFilesType): SortTypeDialog{
             val dialog = SortTypeDialog()

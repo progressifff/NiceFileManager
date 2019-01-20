@@ -30,11 +30,9 @@ abstract class SearchSuggestions : RoomDatabase() {
     abstract fun suggestionDao(): SuggestionDao
 
     companion object {
-        private const val DATABASE_NAME = "SearchSuggestionsDatabase"
-
         val instance: SearchSuggestions by lazy {
             return@lazy Room.databaseBuilder(App.get(),
-                    SearchSuggestions::class.java, SearchSuggestions.DATABASE_NAME).build()
+                    SearchSuggestions::class.java, "SearchSuggestionsDatabase").build()
         }
     }
 }

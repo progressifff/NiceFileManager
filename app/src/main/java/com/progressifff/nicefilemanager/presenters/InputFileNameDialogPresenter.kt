@@ -51,7 +51,7 @@ open class InputFileNameDialogPresenter(file: AbstractStorageFile) : BasePresent
 
     fun inputTextChanged(s: CharSequence, start: Int, count: Int){
         if(!isIOError){
-            if(s.isNotEmpty() && !Pattern.matches(FILE_NAME_REGEX, s)){
+            if(s.isNotEmpty() && !Pattern.matches("^([^\\\\/*?\"<>|]+)\$", s)){
                 isIOError = true
                 currentIOErrorType = IOErrorType.INVALID_FILE_NAME
                 updateView()
@@ -63,10 +63,6 @@ open class InputFileNameDialogPresenter(file: AbstractStorageFile) : BasePresent
             }
         }
         else isIOError = false
-    }
-
-    companion object {
-        private const val FILE_NAME_REGEX = "^([^\\\\/*?\"<>|]+)\$"
     }
 
     enum class IOErrorType{

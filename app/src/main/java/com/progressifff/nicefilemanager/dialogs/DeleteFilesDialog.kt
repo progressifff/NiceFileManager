@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
+import com.progressifff.nicefilemanager.Constants
 import com.progressifff.nicefilemanager.R
 import com.progressifff.nicefilemanager.RxBus
 import com.progressifff.nicefilemanager.RxEvent
@@ -19,7 +20,7 @@ class DeleteFilesDialog : DialogFragment() {
     @SuppressLint("CheckResult")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialogBuilder = AlertDialog.Builder(activity)
-        val filesCount = arguments!!.getInt(FILES_COUNT_LEY)
+        val filesCount = arguments!!.getInt(Constants.FILES_COUNT_KEY)
         if(filesCount < 0){
             throw AssertionError("No files to delete")
         }
@@ -52,12 +53,10 @@ class DeleteFilesDialog : DialogFragment() {
     }
 
     companion object {
-        const val FILES_COUNT_LEY = "filesCount"
-
         fun createInstance(filesCount: Int): DeleteFilesDialog{
             val deleteFilesDialog = DeleteFilesDialog()
             val arguments = Bundle()
-            arguments.putInt(FILES_COUNT_LEY, filesCount)
+            arguments.putInt(Constants.FILES_COUNT_KEY, filesCount)
             deleteFilesDialog.arguments = arguments
             return deleteFilesDialog
         }

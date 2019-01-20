@@ -52,19 +52,12 @@ abstract class AbstractFilesPresenter<M, V : FilesView>(protected val eventBus: 
     }
 
     private fun onFileActionEvent(event: RxEvent.FileActionEvent) {
-
         when(event.action){
-
             FileActionsDialog.FileAction.RENAME -> view!!.showRenameFileDialog(event.file)
-
             FileActionsDialog.FileAction.DELETE -> deleteFile(event.file)
-
             FileActionsDialog.FileAction.COPY -> filesClipboard.clipData = FilesClipboard.ClipData(FilesClipboard.ClipData.Action.COPY, arrayListOf(event.file))
-
             FileActionsDialog.FileAction.CUT -> filesClipboard.clipData = FilesClipboard.ClipData(FilesClipboard.ClipData.Action.CUT, arrayListOf(event.file))
-
             FileActionsDialog.FileAction.SHARE -> view!!.showShareDialog(event.file)
-
             FileActionsDialog.FileAction.DETAILS -> view!!.showFileDetailsDialog(event.file)
         }
     }

@@ -8,14 +8,12 @@ import com.progressifff.nicefilemanager.App
 import kotlin.properties.Delegates
 
 class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
-
     var includeHiddenFiles: Boolean by Delegates.observable(false){
         _, old, new ->
         if(new != old && files.isNotEmpty()){
             load()
         }
     }
-
     private val eventsObserver: FileObserver
 
     init {
@@ -33,7 +31,6 @@ class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
                 }
             }
         }
-
         startEventWatching()
     }
 
@@ -67,9 +64,7 @@ class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
     }
 
     private fun onEvent(event: Int, file: StorageFile){
-
         when (event and FileObserver.ALL_EVENTS) {
-
             FileObserver.DELETE -> {
                 App.get().handler.post{
                     val fileIndex = files.indexOf(file)
@@ -81,7 +76,6 @@ class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
                     }
                 }
             }
-
             FileObserver.CREATE ->{
                 App.get().handler.post {
                     val index = insert(file)
@@ -90,22 +84,13 @@ class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
                     }
                 }
             }
-
             FileObserver.MODIFY -> {
                 App.get().handler.post {
                     (files.find { f -> f.path == file.path } as? StorageFile)?.notifyModified()
                 }
             }
-
-            FileObserver.DELETE_SELF -> {Log.v("DELETE_SELF", "DELETE_SELF")}
-
-            FileObserver.MOVE_SELF -> {Log.v("MOVE_SELF", " MOVE_SELF")}
-
-            FileObserver.ATTRIB -> { }
-
             FileObserver.MOVED_FROM -> {
                 App.get().handler.post{
-
                     var fileIndex = -1
                     for((i, f) in files.withIndex()){
                         if(f.name == file.name) {
@@ -121,25 +106,11 @@ class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
                     }
                 }
             }
-
             FileObserver.MOVED_TO -> {
                 App.get().handler.post {
-                    val removeFileIndex = files.indexOf(file)
-                    if(removeFileIndex >= 0) {
-                        files.removeAt(removeFileIndex)
-                    }
                     val insertedFileIndex = insert(file)
-
-                    for(observer in eventsListeners){
-                        if(removeFileIndex == insertedFileIndex){
-                            observer.onFileChanged(removeFileIndex)
-                        }
-                        else {
-                            if(removeFileIndex >= 0) {
-                                observer.onFileRemoved(removeFileIndex)
-                            }
-                            observer.onFileCreated(insertedFileIndex)
-                        }
+                    for(observer in eventsListeners) {
+                        observer.onFileCreated(insertedFileIndex)
                     }
                 }
             }
@@ -149,11 +120,8 @@ class FilesNode(source: AbstractStorageFile) : AbstractFilesNode(source){
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as FilesNode
-
         if (eventsObserver != other.eventsObserver) return false
-
         return true
     }
 
